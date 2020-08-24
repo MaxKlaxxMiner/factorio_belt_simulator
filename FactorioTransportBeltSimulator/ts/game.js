@@ -1,6 +1,5 @@
-/* tslint:disable:one-line max-line-length interface-name comment-format no-bitwise */
-var Game = /** @class */ (function () {
-    function Game(gameDiv, canvasWidth, canvasHeight) {
+class Game {
+    constructor(gameDiv, canvasWidth, canvasHeight) {
         this.title = document.title;
         this.nextFrameLog = 0;
         this.lastFrameLog = 0;
@@ -9,43 +8,41 @@ var Game = /** @class */ (function () {
         gameDiv.style.width = canvasWidth + "px";
         gameDiv.style.height = canvasHeight + "px";
         gameDiv.style.backgroundColor = "#036";
-        var canvas = document.createElement("canvas");
+        const canvas = document.createElement("canvas");
         canvas.width = canvasWidth;
         canvas.height = canvasHeight;
         this.ctx = canvas.getContext("2d");
         gameDiv.appendChild(canvas);
+        this.sprites = new Sprites();
     }
-    Game.prototype.draw = function () {
-        //this.ctx.putImageData(bitmap, 0, 0);
+    draw() {
         this.countFrame++;
-        var time = performance.now();
+        const time = performance.now();
         if (time > this.nextFrameLog) {
             if (this.countFrame > 0)
-                document.title = this.title + " - fps: " + (this.countFrame / (time - this.lastFrameLog) * 1000).toFixed(1);
+                document.title = this.title + " - fps: " + (this.countFrame / (time - this.lastFrameLog) * 1000).toFixed(1) + " (" + this.sprites.hasLoaded() + ")";
             this.countFrame = 0;
             this.nextFrameLog += 1000;
             this.lastFrameLog = time;
             if (this.nextFrameLog < time)
                 this.nextFrameLog = time;
         }
-    };
-    return Game;
-}());
-var keys = {};
-var game;
-window.onload = function () {
-    document.body.onkeydown = function (e) {
+    }
+}
+const keys = {};
+let game;
+window.onload = () => {
+    document.body.onkeydown = (e) => {
         console.log("key pressed: " + e.keyCode);
         keys[e.keyCode] = true;
     };
-    document.body.onkeyup = function (e) {
+    document.body.onkeyup = (e) => {
         keys[e.keyCode] = false;
     };
-    var docSize = getDocumentSize();
-    var div = document.getElementById("game");
+    const docSize = getDocumentSize();
+    const div = document.getElementById("game");
     game = new Game(div, docSize.width, docSize.height);
-    //window.setInterval(() => game.draw(), 1);
-    var run = function () { requestAnimFrame(run); game.draw(); };
+    const run = () => { requestAnimFrame(run); game.draw(); };
     run();
 };
 //# sourceMappingURL=game.js.map

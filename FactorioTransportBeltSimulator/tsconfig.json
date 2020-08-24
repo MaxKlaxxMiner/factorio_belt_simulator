@@ -1,0 +1,21 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "typeRoots": [
+      //"./ts/def"
+    ],
+    "target": "ES6",
+    "jsx": "react",
+    "module": "None",
+    "noImplicitAny": true,
+    "removeComments": true,
+    //"outFile": "./ts/bundle.js",
+    "declaration": false,
+    "noEmitOnError": true,
+    //"watch": true
+    "sourceMap": true
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}

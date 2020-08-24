@@ -5,8 +5,9 @@ class Game
   gameDiv: HTMLElement;
   ctx: CanvasRenderingContext2D;
   title = document.title;
+  sprites: Sprites;
 
-  constructor(gameDiv: HTMLElement, canvasWidth, canvasHeight)
+  constructor(gameDiv: HTMLElement, canvasWidth: number, canvasHeight: number)
   {
     this.gameDiv = gameDiv;
     gameDiv.style.width = canvasWidth + "px";
@@ -18,6 +19,8 @@ class Game
     canvas.height = canvasHeight;
     this.ctx = canvas.getContext("2d");
     gameDiv.appendChild(canvas);
+
+    this.sprites = new Sprites();
   }
 
   nextFrameLog = 0;
@@ -31,7 +34,7 @@ class Game
     const time = performance.now();
     if (time > this.nextFrameLog)
     {
-      if (this.countFrame > 0) document.title = this.title + " - fps: " + (this.countFrame / (time - this.lastFrameLog) * 1000).toFixed(1);
+      if (this.countFrame > 0) document.title = this.title + " - fps: " + (this.countFrame / (time - this.lastFrameLog) * 1000).toFixed(1) + " (" + this.sprites.hasLoaded() + ")";
       this.countFrame = 0;
       this.nextFrameLog += 1000;
       this.lastFrameLog = time;
@@ -40,8 +43,8 @@ class Game
   }
 }
 
-var keys = {};
-var game: Game;
+const keys: { [key: number]: boolean } = {};
+let game: Game;
 
 window.onload = () =>
 {
@@ -55,11 +58,11 @@ window.onload = () =>
     keys[e.keyCode] = false;
   };
 
-  var docSize = getDocumentSize();
-  var div = document.getElementById("game");
+  const docSize = getDocumentSize();
+  const div = document.getElementById("game");
   game = new Game(div, docSize.width, docSize.height);
 
   //window.setInterval(() => game.draw(), 1);
 
-  var run = () => { requestAnimFrame(run); game.draw(); }; run();
+  const run = () => { requestAnimFrame(run); game.draw(); }; run();
 };

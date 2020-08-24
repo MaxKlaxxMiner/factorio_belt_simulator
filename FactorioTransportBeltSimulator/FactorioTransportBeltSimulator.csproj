@@ -61,6 +61,20 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="favicon.ico" />
+    <Content Include="tsconfig.json" />
+    <Content Include="ts\game.js">
+      <DependentUpon>game.ts</DependentUpon>
+    </Content>
+    <Content Include="ts\game.js.map">
+      <DependentUpon>game.ts</DependentUpon>
+    </Content>
+    <Content Include="ts\sprites.js.map">
+      <DependentUpon>sprites.ts</DependentUpon>
+    </Content>
+    <Content Include="ts\tools.js.map">
+      <DependentUpon>tools.ts</DependentUpon>
+    </Content>
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -77,6 +91,12 @@
     <Content Include="factorio\data\base\graphics\entity\underground-belt\underground-belt-structure.png" />
     <Content Include="factorio\need_files.txt" />
     <Content Include="index.html" />
+    <Content Include="ts\sprites.js">
+      <DependentUpon>sprites.ts</DependentUpon>
+    </Content>
+    <Content Include="ts\tools.js">
+      <DependentUpon>tools.ts</DependentUpon>
+    </Content>
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -84,6 +104,7 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <TypeScriptCompile Include="ts\sprites.ts" />
     <TypeScriptCompile Include="ts\tools.ts" />
     <TypeScriptCompile Include="ts\game.ts" />
   </ItemGroup>
