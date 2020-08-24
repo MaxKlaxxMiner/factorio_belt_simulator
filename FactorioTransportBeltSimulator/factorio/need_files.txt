@@ -1,0 +1,8 @@
+﻿# *** copy from game directory ***
+
+\data\base\graphics\entity\transport-belt\transport-belt.png
+\data\base\graphics\entity\splitter\splitter-east.png
+\data\base\graphics\entity\splitter\splitter-north.png
+\data\base\graphics\entity\splitter\splitter-south.png
+\data\base\graphics\entity\splitter\splitter-west.png
+\data\base\graphics\entity\underground-belt\underground-belt-structure.png

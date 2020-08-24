@@ -1,0 +1,5 @@
+/FactorioTransportBeltSimulator/factorio/data
+/FactorioTransportBeltSimulator/*.user
+/FactorioTransportBeltSimulator/obj
+/FactorioTransportBeltSimulator/bin
+/.vs
