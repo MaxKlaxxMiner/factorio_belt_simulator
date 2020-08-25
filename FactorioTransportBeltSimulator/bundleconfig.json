@@ -1,0 +1,16 @@
+[
+  {
+    "outputFileName": "ts/bundle-es5.min.js",
+    "inputFiles":
+    [
+      "ts/bundle-es5.js"
+    ]
+  },
+  {
+    "outputFileName": "ts/bundle.min.js",
+    "inputFiles":
+    [
+      "ts/bundle.js"
+    ]
+  }
+]

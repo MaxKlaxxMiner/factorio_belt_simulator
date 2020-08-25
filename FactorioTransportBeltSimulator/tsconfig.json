@@ -22,7 +22,8 @@
     //"watch": true
     "sourceMap": true
   },
-  "exclude": [
+  "exclude":
+  [
     "node_modules"
   ]
 }

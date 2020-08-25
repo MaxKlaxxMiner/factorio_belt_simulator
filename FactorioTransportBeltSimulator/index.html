@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title>FTBS v0.006</title>
+  <title>FTBS v0.007</title>
   <script type="text/javascript">
     function checkEs6()
     {
@@ -10,20 +10,27 @@
       return true;
     }
 
-    function loadScript(url)
+    function loadScript(url, error)
     {
       var script = document.createElement("script");
+      script.onerror = error;
       script.src = url;
       document.head.appendChild(script);
     }
 
     if (checkEs6())
     {
-      loadScript("/ts/bundle.js?" + document.title);
+      loadScript("/ts/bundle.min.js?" + document.title, function ()
+      {
+        loadScript("/ts/bundle.js?" + document.title);
+      });
     }
     else
     {
-      loadScript("/ts/bundle-es5.js?" + document.title);
+      loadScript("/ts/bundle-es5.min.js?" + document.title, function ()
+      {
+        loadScript("/ts/bundle-es5.js?" + document.title);
+      });
     }
   </script>
   <style>
