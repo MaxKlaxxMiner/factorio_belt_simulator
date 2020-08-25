@@ -61,19 +61,15 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="factorio\data\base\graphics\terrain\tutorial-grid\hr-tutorial-grid1.png" />
     <Content Include="favicon.ico" />
+    <None Include="ts\bundle-es5.js" />
     <Content Include="tsconfig.json" />
-    <Content Include="ts\game.js">
-      <DependentUpon>game.ts</DependentUpon>
+    <Content Include="ts\bundle.js.map">
+      <DependentUpon>bundle.js</DependentUpon>
     </Content>
-    <Content Include="ts\game.js.map">
-      <DependentUpon>game.ts</DependentUpon>
-    </Content>
-    <Content Include="ts\sprites.js.map">
-      <DependentUpon>sprites.ts</DependentUpon>
-    </Content>
-    <Content Include="ts\tools.js.map">
-      <DependentUpon>tools.ts</DependentUpon>
+    <Content Include="ts\bundle-es5.js.map">
+      <DependentUpon>bundle-es5.js</DependentUpon>
     </Content>
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -91,12 +87,7 @@
     <Content Include="factorio\data\base\graphics\entity\underground-belt\underground-belt-structure.png" />
     <Content Include="factorio\need_files.txt" />
     <Content Include="index.html" />
-    <Content Include="ts\sprites.js">
-      <DependentUpon>sprites.ts</DependentUpon>
-    </Content>
-    <Content Include="ts\tools.js">
-      <DependentUpon>tools.ts</DependentUpon>
-    </Content>
+    <None Include="ts\bundle.js" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>

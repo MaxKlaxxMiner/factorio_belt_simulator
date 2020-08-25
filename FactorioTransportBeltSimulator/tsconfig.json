@@ -1,15 +1,22 @@
 {
   "compileOnSave": true,
-  "compilerOptions": {
-    "typeRoots": [
+  "compilerOptions":
+  {
+    "typeRoots":
+    [
       //"./ts/def"
     ],
+
     "target": "ES6",
+    "outFile": "./ts/bundle.js",
+
+    //"target": "ES5",
+    //"outFile": "./ts/bundle-es5.js",
+
     "jsx": "react",
     "module": "None",
     "noImplicitAny": true,
     "removeComments": true,
-    //"outFile": "./ts/bundle.js",
     "declaration": false,
     "noEmitOnError": true,
     //"watch": true

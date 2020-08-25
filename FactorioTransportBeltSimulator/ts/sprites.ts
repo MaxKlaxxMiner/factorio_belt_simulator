@@ -2,6 +2,7 @@
 
 class Sprites
 {
+  tutorialGrid: HTMLImageElement;
   transportBelt: HTMLImageElement;
   splitterEast: HTMLImageElement;
   splitterNorth: HTMLImageElement;
@@ -26,6 +27,8 @@ class Sprites
 
   constructor()
   {
+    Sprites.loadImg("/factorio/data/base/graphics/terrain/tutorial-grid/hr-tutorial-grid1.png", img => { this.tutorialGrid = img; });
+
     const path = "/factorio/data/base/graphics/entity/";
     Sprites.loadImg(path + "transport-belt/transport-belt.png", img => { this.transportBelt = img; });
     Sprites.loadImg(path + "splitter/splitter-east.png", img => { this.splitterEast = img; });
@@ -39,7 +42,7 @@ class Sprites
   hasLoaded(): boolean
   {
     if (this.loadChecked) return true;
-    const check = this.transportBelt && this.splitterEast && this.splitterNorth && this.splitterSouth && this.splitterWest && this.undergroundBelt && true;
+    const check = this.tutorialGrid && this.transportBelt && this.splitterEast && this.splitterNorth && this.splitterSouth && this.splitterWest && this.undergroundBelt && true;
     if (check) this.loadChecked = true;
     return check;
   }
