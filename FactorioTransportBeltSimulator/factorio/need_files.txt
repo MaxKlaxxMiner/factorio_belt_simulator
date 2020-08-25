@@ -1,8 +1,18 @@
 ﻿# *** copy from game directory ***
 
-\data\base\graphics\entity\transport-belt\transport-belt.png
-\data\base\graphics\entity\splitter\splitter-east.png
-\data\base\graphics\entity\splitter\splitter-north.png
-\data\base\graphics\entity\splitter\splitter-south.png
-\data\base\graphics\entity\splitter\splitter-west.png
-\data\base\graphics\entity\underground-belt\underground-belt-structure.png
+set src=C:\Program Files (x86)\steam\steamapps\common\Factorio
+set dst=C:\code\factorio_belt_simulator
+
+@echo off
+
+if not exist "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity" mkdir "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity"
+if not exist "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\transport-belt" mkdir "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\transport-belt"
+if not exist "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter" mkdir "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter"
+if not exist "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\underground-belt" mkdir "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\underground-belt"
+
+copy /Y "%src%\data\base\graphics\entity\transport-belt\transport-belt.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\transport-belt"
+copy /Y "%src%\data\base\graphics\entity\splitter\splitter-east.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter"
+copy /Y "%src%\data\base\graphics\entity\splitter\splitter-north.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter"
+copy /Y "%src%\data\base\graphics\entity\splitter\splitter-south.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter"
+copy /Y "%src%\data\base\graphics\entity\splitter\splitter-west.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter"
+copy /Y "%src%\data\base\graphics\entity\underground-belt\underground-belt-structure.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\underground-belt"
