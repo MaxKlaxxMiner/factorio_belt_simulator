@@ -42,9 +42,10 @@ class Game
     c.clearRect(0, 0, w, h);
 
     const scale = 32;
+    const animate = this.animate % 16;
     const belt = (x: number, y: number, type: number) =>
     {
-      c.drawImage(sp.transportBelt, this.animate * 64, type * 64, 64, 64, x * scale, y * scale, scale * 2, scale * 2);
+      c.drawImage(sp.transportBelt, animate * 64, type * 64, 64, 64, x * scale, y * scale, scale * 2, scale * 2);
     };
 
     belt(0, 0, 8); belt(1, 0, 0); belt(2, 0, 0); belt(3, 0, 0); belt(4, 0, 11);
@@ -52,9 +53,14 @@ class Game
     belt(0, 2, 2); belt(1, 2, 9); belt(2, 2, 1); belt(3, 2, 10); belt(4, 2, 3);
     belt(0, 3, 4); belt(1, 3, 7); belt(3, 3, 4); belt(4, 3, 7);
 
-    this.animate++;
-    if (this.animate === 16) this.animate = 0;
+    if (this.animate < 120)
+    {
+      c.globalAlpha = Easing.easeInQuad((120 - this.animate) / 120);
+      c.fillRect(0, 0, w, h);
+      c.globalAlpha = 1.0;
+    }
 
+    this.animate++;
     this.countFrame++;
     const time = performance.now();
     if (time > this.nextFrameLog)

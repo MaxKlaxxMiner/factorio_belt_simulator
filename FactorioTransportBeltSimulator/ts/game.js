@@ -27,8 +27,9 @@ class Game {
         c.imageSmoothingQuality = "high";
         c.clearRect(0, 0, w, h);
         const scale = 32;
+        const animate = this.animate % 16;
         const belt = (x, y, type) => {
-            c.drawImage(sp.transportBelt, this.animate * 64, type * 64, 64, 64, x * scale, y * scale, scale * 2, scale * 2);
+            c.drawImage(sp.transportBelt, animate * 64, type * 64, 64, 64, x * scale, y * scale, scale * 2, scale * 2);
         };
         belt(0, 0, 8);
         belt(1, 0, 0);
@@ -46,9 +47,12 @@ class Game {
         belt(1, 3, 7);
         belt(3, 3, 4);
         belt(4, 3, 7);
+        if (this.animate < 120) {
+            c.globalAlpha = Easing.easeInQuad((120 - this.animate) / 120);
+            c.fillRect(0, 0, w, h);
+            c.globalAlpha = 1.0;
+        }
         this.animate++;
-        if (this.animate === 16)
-            this.animate = 0;
         this.countFrame++;
         const time = performance.now();
         if (time > this.nextFrameLog) {
