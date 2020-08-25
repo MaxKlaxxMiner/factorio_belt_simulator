@@ -57,9 +57,10 @@ var Game = (function () {
         c.imageSmoothingEnabled = false;
         c.imageSmoothingQuality = "high";
         var scale = 4 << this.scaleLevel;
-        var ofsX = -scale * 0.52;
-        var ofsY = -scale * 0.62;
-        var animate = this.animate % 16;
+        var ofsX = -scale * 0.5;
+        var ofsY = -scale * 0.5;
+        var animate = this.animate & 15;
+        var animate2 = (this.animate * 0.70) & 31;
         c.clearRect(0, 0, w, h);
         if (this.scaleLevel > 1) {
             var gridWidth = Math.floor(this.sprites.tutorialGrid.width * scale / 64);
@@ -95,6 +96,36 @@ var Game = (function () {
         belt(2, 4, 7);
         belt(4, 4, 4);
         belt(5, 4, 7);
+        var splOfsX = -scale * 0.15;
+        var splOfsY = -scale * 0.0;
+        var splW = Math.floor(sp.splitterSouth.width / 8);
+        var splH = Math.floor(sp.splitterSouth.height / 4);
+        belt(6, 2, 14);
+        belt(7, 2, 0);
+        belt(8, 2, 11);
+        belt(9, 2, 9);
+        belt(10, 2, 1);
+        belt(11, 2, 18);
+        belt(8, 3, 3);
+        belt(9, 3, 3);
+        belt(6, 4, 15);
+        belt(7, 4, 1);
+        belt(8, 4, 7);
+        belt(9, 4, 5);
+        belt(10, 4, 0);
+        belt(11, 4, 19);
+        c.drawImage(sp.splitterSouth, (animate2 & 7) * splW, (animate2 >> 3) * splH, splW, splH, 8 * scale + splOfsX, 3 * scale + splOfsY, scale * 2.55, scale);
+        c.beginPath();
+        c.strokeStyle = "#0f0";
+        c.lineWidth = 1;
+        c.moveTo(8 * scale + 0.5, 0);
+        c.lineTo(8 * scale + 0.5, 8 * scale);
+        c.moveTo(9 * scale + 0.5, 0);
+        c.lineTo(9 * scale + 0.5, 8 * scale);
+        c.moveTo(10 * scale + 0.5, 0);
+        c.lineTo(10 * scale + 0.5, 8 * scale);
+        c.stroke();
+        c.closePath();
         if (this.animate < 120) {
             c.globalAlpha = Easing.easeInQuad((120 - this.animate) / 120);
             c.fillStyle = "#000";
@@ -138,10 +169,10 @@ var Sprites = (function () {
         Sprites.loadImg("/factorio/data/base/graphics/terrain/tutorial-grid/hr-tutorial-grid1.png", function (img) { _this.tutorialGrid = img; });
         var path = "/factorio/data/base/graphics/entity/";
         Sprites.loadImg(path + "transport-belt/transport-belt.png", function (img) { _this.transportBelt = img; });
-        Sprites.loadImg(path + "splitter/splitter-east.png", function (img) { _this.splitterEast = img; });
-        Sprites.loadImg(path + "splitter/splitter-north.png", function (img) { _this.splitterNorth = img; });
-        Sprites.loadImg(path + "splitter/splitter-south.png", function (img) { _this.splitterSouth = img; });
-        Sprites.loadImg(path + "splitter/splitter-west.png", function (img) { _this.splitterWest = img; });
+        Sprites.loadImg(path + "splitter/hr-splitter-east.png", function (img) { _this.splitterEast = img; });
+        Sprites.loadImg(path + "splitter/hr-splitter-north.png", function (img) { _this.splitterNorth = img; });
+        Sprites.loadImg(path + "splitter/hr-splitter-south.png", function (img) { _this.splitterSouth = img; });
+        Sprites.loadImg(path + "splitter/hr-splitter-west.png", function (img) { _this.splitterWest = img; });
         Sprites.loadImg(path + "underground-belt/underground-belt-structure.png", function (img) { _this.undergroundBelt = img; });
     }
     Sprites.loadImg = function (url, callback) {

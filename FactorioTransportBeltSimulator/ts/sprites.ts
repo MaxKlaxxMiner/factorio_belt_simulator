@@ -31,10 +31,10 @@ class Sprites
 
     const path = "/factorio/data/base/graphics/entity/";
     Sprites.loadImg(path + "transport-belt/transport-belt.png", img => { this.transportBelt = img; });
-    Sprites.loadImg(path + "splitter/splitter-east.png", img => { this.splitterEast = img; });
-    Sprites.loadImg(path + "splitter/splitter-north.png", img => { this.splitterNorth = img; });
-    Sprites.loadImg(path + "splitter/splitter-south.png", img => { this.splitterSouth = img; });
-    Sprites.loadImg(path + "splitter/splitter-west.png", img => { this.splitterWest = img; });
+    Sprites.loadImg(path + "splitter/hr-splitter-east.png", img => { this.splitterEast = img; });
+    Sprites.loadImg(path + "splitter/hr-splitter-north.png", img => { this.splitterNorth = img; });
+    Sprites.loadImg(path + "splitter/hr-splitter-south.png", img => { this.splitterSouth = img; });
+    Sprites.loadImg(path + "splitter/hr-splitter-west.png", img => { this.splitterWest = img; });
     Sprites.loadImg(path + "underground-belt/underground-belt-structure.png", img => { this.undergroundBelt = img; });
   }
 

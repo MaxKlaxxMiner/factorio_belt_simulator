@@ -1,7 +1,7 @@
 ﻿# *** copy from game directory ***
 
-set src=C:\Program Files (x86)\steam\steamapps\common\Factorio
-set dst=C:\code\factorio_belt_simulator
+set src=C:\Spiele\Steam\steamapps\common\Factorio
+set dst=C:\Users\MaxKlaxx\Desktop\Prog\Spiele\factorio_belt_simulator
 
 @echo off
 
@@ -13,8 +13,8 @@ if not exist "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\e
 
 copy /Y "%src%\data\base\graphics\terrain\tutorial-grid\hr-tutorial-grid1.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\terrain\tutorial-grid"
 copy /Y "%src%\data\base\graphics\entity\transport-belt\transport-belt.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\transport-belt"
-copy /Y "%src%\data\base\graphics\entity\splitter\splitter-east.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter"
-copy /Y "%src%\data\base\graphics\entity\splitter\splitter-north.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter"
-copy /Y "%src%\data\base\graphics\entity\splitter\splitter-south.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter"
-copy /Y "%src%\data\base\graphics\entity\splitter\splitter-west.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter"
+copy /Y "%src%\data\base\graphics\entity\splitter\hr-splitter-east.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter"
+copy /Y "%src%\data\base\graphics\entity\splitter\hr-splitter-north.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter"
+copy /Y "%src%\data\base\graphics\entity\splitter\hr-splitter-south.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter"
+copy /Y "%src%\data\base\graphics\entity\splitter\hr-splitter-west.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter"
 copy /Y "%src%\data\base\graphics\entity\underground-belt\underground-belt-structure.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\underground-belt"
