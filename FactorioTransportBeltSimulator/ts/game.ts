@@ -171,28 +171,28 @@ class Game
       if (this.nextFrameLog < time) this.nextFrameLog = time;
     }
   }
+
+  static run(): void
+  {
+    document.body.onkeydown = (e: KeyboardEvent) =>
+    {
+      console.log("key pressed: " + e.keyCode);
+      keys[e.keyCode] = true;
+    };
+    document.body.onkeyup = (e: KeyboardEvent) =>
+    {
+      keys[e.keyCode] = false;
+    };
+
+    const docSize = getDocumentSize();
+    const div = document.getElementById("game");
+    game = new Game(div, docSize.width, docSize.height);
+
+    //window.setInterval(() => game.draw(), 8); // 125 FPS test
+
+    const run = () => { requestAnimFrame(run); game.draw(); }; run();
+  }
 }
 
 const keys: { [key: number]: boolean } = {};
 let game: Game;
-
-window.onload = () =>
-{
-  document.body.onkeydown = (e: KeyboardEvent) =>
-  {
-    console.log("key pressed: " + e.keyCode);
-    keys[e.keyCode] = true;
-  };
-  document.body.onkeyup = (e: KeyboardEvent) =>
-  {
-    keys[e.keyCode] = false;
-  };
-
-  const docSize = getDocumentSize();
-  const div = document.getElementById("game");
-  game = new Game(div, docSize.width, docSize.height);
-
-  //window.setInterval(() => game.draw(), 8); // 125 FPS test
-
-  const run = () => { requestAnimFrame(run); game.draw(); }; run();
-};

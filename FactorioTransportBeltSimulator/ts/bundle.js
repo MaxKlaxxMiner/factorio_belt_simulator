@@ -144,23 +144,23 @@ class Game {
                 this.nextFrameLog = time;
         }
     }
+    static run() {
+        document.body.onkeydown = (e) => {
+            console.log("key pressed: " + e.keyCode);
+            keys[e.keyCode] = true;
+        };
+        document.body.onkeyup = (e) => {
+            keys[e.keyCode] = false;
+        };
+        const docSize = getDocumentSize();
+        const div = document.getElementById("game");
+        game = new Game(div, docSize.width, docSize.height);
+        const run = () => { requestAnimFrame(run); game.draw(); };
+        run();
+    }
 }
 const keys = {};
 let game;
-window.onload = () => {
-    document.body.onkeydown = (e) => {
-        console.log("key pressed: " + e.keyCode);
-        keys[e.keyCode] = true;
-    };
-    document.body.onkeyup = (e) => {
-        keys[e.keyCode] = false;
-    };
-    const docSize = getDocumentSize();
-    const div = document.getElementById("game");
-    game = new Game(div, docSize.width, docSize.height);
-    const run = () => { requestAnimFrame(run); game.draw(); };
-    run();
-};
 class Sprites {
     constructor() {
         this.loadChecked = false;

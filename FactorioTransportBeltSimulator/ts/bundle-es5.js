@@ -144,24 +144,24 @@ var Game = (function () {
                 this.nextFrameLog = time;
         }
     };
+    Game.run = function () {
+        document.body.onkeydown = function (e) {
+            console.log("key pressed: " + e.keyCode);
+            keys[e.keyCode] = true;
+        };
+        document.body.onkeyup = function (e) {
+            keys[e.keyCode] = false;
+        };
+        var docSize = getDocumentSize();
+        var div = document.getElementById("game");
+        game = new Game(div, docSize.width, docSize.height);
+        var run = function () { requestAnimFrame(run); game.draw(); };
+        run();
+    };
     return Game;
 }());
 var keys = {};
 var game;
-window.onload = function () {
-    document.body.onkeydown = function (e) {
-        console.log("key pressed: " + e.keyCode);
-        keys[e.keyCode] = true;
-    };
-    document.body.onkeyup = function (e) {
-        keys[e.keyCode] = false;
-    };
-    var docSize = getDocumentSize();
-    var div = document.getElementById("game");
-    game = new Game(div, docSize.width, docSize.height);
-    var run = function () { requestAnimFrame(run); game.draw(); };
-    run();
-};
 var Sprites = (function () {
     function Sprites() {
         var _this = this;

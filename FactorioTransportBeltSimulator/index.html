@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title>FTBS v0.008</title>
+  <title>FTBS v0.009</title>
   <script type="text/javascript">
     function checkEs6()
     {
@@ -10,28 +10,35 @@
       return true;
     }
 
-    function loadScript(url, error)
+    function loadScript(url, run, error)
     {
       var script = document.createElement("script");
-      script.onerror = error;
+      script.onload = function () { run && run(); };
+      script.onerror = function () { error && error(); };
       script.src = url;
       document.head.appendChild(script);
     }
 
-    if (checkEs6())
+    window.onload = function ()
     {
-      loadScript("/ts/bundle.min.js?" + document.title, function ()
+      if (checkEs6())
       {
-        loadScript("/ts/bundle.js?" + document.title);
-      });
-    }
-    else
-    {
-      loadScript("/ts/bundle-es5.min.js?" + document.title, function ()
+        loadScript("/ts/bundle.min.js?" + document.title, function () { Game.run(); }, function ()
+        {
+          loadScript("/ts/bundle.js?" + document.title, function () { Game.run(); });
+        });
+      }
+      else
       {
-        loadScript("/ts/bundle-es5.js?" + document.title);
-      });
-    }
+        loadScript("/js/fallback.js?" + document.title, function ()
+        {
+          loadScript("/ts/bundle-es5.min.js?" + document.title, function () { Game.run(); }, function ()
+          {
+            loadScript("/ts/bundle-es5.js?" + document.title, function () { Game.run(); });
+          });
+        });
+      }
+    };
   </script>
   <style>
     html, body, div

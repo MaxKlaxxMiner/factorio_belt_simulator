@@ -65,6 +65,7 @@
     <Content Include="favicon.ico" />
     <None Include="bundleconfig.json" />
     <None Include="ts\bundle-es5.js" />
+    <Content Include="js\fallback.js" />
     <Content Include="tsconfig.json" />
     <Content Include="ts\bundle-es5.min.js">
       <DependentUpon>bundle-es5.js</DependentUpon>
