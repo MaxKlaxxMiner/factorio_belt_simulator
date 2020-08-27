@@ -64,18 +64,16 @@
     <Content Include="factorio\data\base\graphics\terrain\tutorial-grid\hr-tutorial-grid1.png" />
     <Content Include="favicon.ico" />
     <None Include="bundleconfig.json" />
-    <None Include="ts\bundle-es5.js" />
-    <Content Include="js\fallback.js" />
-    <Content Include="tsconfig.json" />
-    <Content Include="ts\bundle-es5.min.js">
-      <DependentUpon>bundle-es5.js</DependentUpon>
-    </Content>
-    <Content Include="ts\bundle.js.map">
+    <Content Include="js\bundle.js" />
+    <Content Include="js\bundle.js.map">
       <DependentUpon>bundle.js</DependentUpon>
     </Content>
-    <Content Include="ts\bundle-es5.js.map">
+    <Content Include="js\bundle-es5.js" />
+    <Content Include="js\bundle-es5.js.map">
       <DependentUpon>bundle-es5.js</DependentUpon>
     </Content>
+    <Content Include="js\fallback.js" />
+    <Content Include="tsconfig.json" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -92,10 +90,6 @@
     <Content Include="factorio\data\base\graphics\entity\underground-belt\underground-belt-structure.png" />
     <Content Include="factorio\need_files.txt" />
     <Content Include="index.html" />
-    <None Include="ts\bundle.js" />
-    <Content Include="ts\bundle.min.js">
-      <DependentUpon>bundle.js</DependentUpon>
-    </Content>
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
