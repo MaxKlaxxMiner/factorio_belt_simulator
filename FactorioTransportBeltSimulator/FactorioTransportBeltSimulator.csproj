@@ -97,6 +97,7 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <TypeScriptCompile Include="ts\displayEntities.ts" />
     <TypeScriptCompile Include="ts\display.ts" />
     <TypeScriptCompile Include="ts\sprites.ts" />
     <TypeScriptCompile Include="ts\tools.ts" />

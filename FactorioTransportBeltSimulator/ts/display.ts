@@ -8,6 +8,8 @@ class Display
   title = document.title;
   sprites: Sprites;
 
+  entityTransportBelt: DisplayEntity;
+
   constructor(gameDiv: HTMLElement, canvasWidth: number, canvasHeight: number)
   {
     this.gameDiv = gameDiv;
@@ -22,6 +24,10 @@ class Display
     gameDiv.appendChild(this.canvasElement);
 
     this.sprites = new Sprites();
+
+    this.setScale(5);
+
+    this.entityTransportBelt = new DisplayEntityTransportBelt();
   }
 
   countFrame = 0;
@@ -29,7 +35,8 @@ class Display
   nextFrameLog = 0;
   lastFrameLog = 0;
   animate = 0;
-  scaleLevel = 5;
+  scaleLevel: number;
+  scale: number;
 
   setScale(scaleLevel: number): void
   {
@@ -39,6 +46,7 @@ class Display
     if (scaleLevel !== this.scaleLevel)
     {
       this.scaleLevel = scaleLevel;
+      this.scale = 4 << scaleLevel;
     }
   }
 
@@ -50,28 +58,24 @@ class Display
 
   draw(time: number): boolean
   {
+    if (!this.sprites || !this.sprites.hasLoaded()) return false; // missing sprites?
+
     const sp = this.sprites;
     const c = this.canvasContext;
     const w = this.canvasElement.width;
     const h = this.canvasElement.height;
-    if (!sp || !sp.hasLoaded()) return false; // missing sprites?
+    this.entityTransportBelt.updateForDisplay(this);
 
     c.imageSmoothingEnabled = false;
     c.imageSmoothingQuality = "high";
 
-    const scale = 4 << this.scaleLevel;
-    const ofsX = -scale * 0.5;
-    const ofsY = -scale * 0.5;
-    const animate = this.animate & 15;
-    const animate2 = (this.animate * 0.70) & 31;
-
-    c.clearRect(0, 0, w, h);
-
     // --- Background (tutorial-grid) ---
     if (this.scaleLevel > 1)
     {
-      const gridWidth = Math.floor(this.sprites.tutorialGrid.width * scale / 64);
-      const gridHeight = Math.floor(this.sprites.tutorialGrid.height * scale / 64);
+      c.clearRect(0, 0, w, h);
+
+      const gridWidth = Math.floor(this.sprites.tutorialGrid.width * this.scale / 64);
+      const gridHeight = Math.floor(this.sprites.tutorialGrid.height * this.scale / 64);
       for (let y = 0; y < h; y += gridHeight)
       {
         for (let x = -(y % gridWidth) * 6; x < w; x += gridWidth)
@@ -85,13 +89,12 @@ class Display
       c.fillStyle = "#848484";
       c.fillRect(0, 0, w, w);
     }
-
     if (this.scaleLevel < 2) c.imageSmoothingEnabled = true;
 
-    const belt = (x: number, y: number, type: number) =>
-    {
-      c.drawImage(sp.transportBelt, animate * 64, type * 64, 64, 64, x * scale + ofsX, y * scale + ofsY, scale * 2, scale * 2);
-    };
+    // --- Entities ---
+    const animate2 = (this.animate * 0.70) & 31;
+
+    const belt = this.entityTransportBelt.draw;
 
     // --- belts ---
     //  0 = left -> right
@@ -120,23 +123,39 @@ class Display
     belt(1, 3, 2); belt(2, 3, 9); belt(3, 3, 1); belt(4, 3, 10); belt(5, 3, 3);
     belt(1, 4, 4); belt(2, 4, 7); belt(4, 4, 4); belt(5, 4, 7);
 
-    const splOfsX = -scale * 0.15;
-    const splOfsY = -scale * 0.0;
+    const splOfsX = -this.scale * 0.15;
+    const splOfsY = -this.scale * 0.0;
     const splW = Math.floor(sp.splitterSouth.width / 8);
     const splH = Math.floor(sp.splitterSouth.height / 4);
     belt(6, 2, 14); belt(7, 2, 0); belt(8, 2, 11); belt(9, 2, 9); belt(10, 2, 1); belt(11, 2, 18);
     belt(8, 3, 3); belt(9, 3, 3);
     belt(6, 4, 15); belt(7, 4, 1); belt(8, 4, 7); belt(9, 4, 5); belt(10, 4, 0); belt(11, 4, 19);
-    c.drawImage(sp.splitterSouth, (animate2 & 7) * splW, (animate2 >> 3) * splH, splW, splH, 8 * scale + splOfsX, 3 * scale + splOfsY, scale * 2.55, scale);
-    c.beginPath();
-    c.strokeStyle = "#0f0";
-    c.lineWidth = 1;
-    c.moveTo(8 * scale + 0.5, 0); c.lineTo(8 * scale + 0.5, 8 * scale);
-    c.moveTo(9 * scale + 0.5, 0); c.lineTo(9 * scale + 0.5, 8 * scale);
-    c.moveTo(10 * scale + 0.5, 0); c.lineTo(10 * scale + 0.5, 8 * scale);
-    c.stroke();
-    c.closePath();
+    c.drawImage(sp.splitterSouth, (animate2 & 7) * splW, (animate2 >> 3) * splH, splW, splH, 8 * this.scale + splOfsX, 3 * this.scale + splOfsY, this.scale * 2.55, this.scale);
 
+    // --- Helper lines ---
+    const helpLines = (x: number, y: number, width: number, height: number) =>
+    {
+      c.beginPath();
+      c.strokeStyle = "#0f0";
+      c.lineWidth = 1;
+      const s = this.scale;
+      for (let cy = 0; cy <= height; cy++)
+      {
+        c.moveTo(x * s + 0.5, (y + cy) * s + 0.5);
+        c.lineTo((x + width) * s + 0.5, (y + cy) * s + 0.5);
+      }
+      for (let cx = 0; cx <= width; cx++)
+      {
+        c.moveTo((x + cx) * s + 0.5, y * s + 0.5);
+        c.lineTo((x + cx) * s + 0.5, (y + height) * s + 0.5);
+      }
+      c.stroke();
+      c.closePath();
+    };
+
+    helpLines(7, 2, 4, 3);
+
+    // --- Final ---
     if (this.animate < 120)
     {
       c.globalAlpha = Easing.easeInQuad((120 - this.animate) / 120);
