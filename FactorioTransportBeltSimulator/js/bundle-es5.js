@@ -1,11 +1,10 @@
-var Game = (function () {
-    function Game(gameDiv, canvasWidth, canvasHeight) {
+var Display = (function () {
+    function Display(gameDiv, canvasWidth, canvasHeight) {
         this.title = document.title;
-        this.nextFrameLog = 0;
-        this.lastFrameLog = 0;
-        this.calcTime = 0;
         this.countFrame = 0;
         this.countCalc = 0;
+        this.nextFrameLog = 0;
+        this.lastFrameLog = 0;
         this.animate = 0;
         this.scaleLevel = 5;
         this.gameDiv = gameDiv;
@@ -19,41 +18,27 @@ var Game = (function () {
         gameDiv.appendChild(this.canvasElement);
         this.sprites = new Sprites();
     }
-    Game.prototype.ui = function () {
-        if (keys[107]) {
-            keys[107] = false;
-            this.scaleLevel++;
-            if (this.scaleLevel > 6)
-                this.scaleLevel = 6;
-        }
-        if (keys[109]) {
-            keys[109] = false;
-            this.scaleLevel--;
-            if (this.scaleLevel < 0)
-                this.scaleLevel = 0;
+    Display.prototype.setScale = function (scaleLevel) {
+        scaleLevel = Math.floor(scaleLevel);
+        if (scaleLevel > 6)
+            scaleLevel = 6;
+        if (scaleLevel < 0)
+            scaleLevel = 0;
+        if (scaleLevel !== this.scaleLevel) {
+            this.scaleLevel = scaleLevel;
         }
     };
-    Game.prototype.calc = function () {
+    Display.prototype.calc = function () {
         this.animate++;
         this.countCalc++;
-        this.calcTime += 16.6666666;
     };
-    Game.prototype.draw = function () {
+    Display.prototype.draw = function (time) {
         var sp = this.sprites;
         var c = this.canvasContext;
         var w = this.canvasElement.width;
         var h = this.canvasElement.height;
         if (!sp || !sp.hasLoaded())
-            return;
-        this.ui();
-        var time = performance.now();
-        if (this.calcTime === 0)
-            this.calcTime = time;
-        if (this.calcTime < time + 30 && this.calcTime > time - 30)
-            this.calc();
-        else
-            while (this.calcTime < time - 20)
-                this.calc();
+            return false;
         c.imageSmoothingEnabled = false;
         c.imageSmoothingQuality = "high";
         var scale = 4 << this.scaleLevel;
@@ -143,6 +128,41 @@ var Game = (function () {
             if (this.nextFrameLog < time)
                 this.nextFrameLog = time;
         }
+        return true;
+    };
+    return Display;
+}());
+var Game = (function () {
+    function Game(gameDiv, canvasWidth, canvasHeight) {
+        this.calcTime = 0;
+        this.display = new Display(gameDiv, canvasWidth, canvasHeight);
+    }
+    Game.prototype.uiUpdate = function () {
+        if (keys[107]) {
+            keys[107] = false;
+            this.display.setScale(this.display.scaleLevel + 1);
+        }
+        if (keys[109]) {
+            keys[109] = false;
+            this.display.setScale(this.display.scaleLevel - 1);
+        }
+    };
+    Game.prototype.calc = function () {
+        this.display.calc();
+        this.calcTime += 16.6666666;
+    };
+    Game.prototype.draw = function () {
+        var time = performance.now();
+        if (!this.display.draw(time))
+            return;
+        this.uiUpdate();
+        if (this.calcTime === 0)
+            this.calcTime = time;
+        if (this.calcTime < time + 30 && this.calcTime > time - 30)
+            this.calc();
+        else
+            while (this.calcTime < time - 20)
+                this.calc();
     };
     Game.run = function () {
         document.body.onkeydown = function (e) {
