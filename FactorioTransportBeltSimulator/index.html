@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title>FTBS v0.012</title>
+  <title>FTBS v0.013</title>
   <script type="text/javascript">
     function checkEs6()
     {
@@ -21,23 +21,24 @@
 
     window.onload = function ()
     {
+      var rnd = +new Date();
       if (checkEs6())
       {
-        loadScript("/js/bundle.min.js?" + document.title, function () { Game.run(); }, function ()
+        loadScript("/js/bundle.min.js?" + rnd, function () { Game.run(); }, function ()
         {
-          loadScript("/js/bundle.js?" + document.title, function () { Game.run(); }, function ()
+          loadScript("/js/bundle.js?" + rnd, function () { Game.run(); }, function ()
           {
-            loadScript("/js/bundle-es5.js?" + document.title, function () { Game.run(); });
+            loadScript("/js/bundle-es5.js?" + rnd, function () { Game.run(); });
           });
         });
       }
       else
       {
-        loadScript("/js/fallback.js?" + document.title, function ()
+        loadScript("/js/fallback.js?" + rnd, function ()
         {
-          loadScript("/js/bundle-es5.min.js?" + document.title, function () { Game.run(); }, function ()
+          loadScript("/js/bundle-es5.min.js?" + rnd, function () { Game.run(); }, function ()
           {
-            loadScript("/js/bundle-es5.js?" + document.title, function () { Game.run(); });
+            loadScript("/js/bundle-es5.js?" + rnd, function () { Game.run(); });
           });
         });
       }

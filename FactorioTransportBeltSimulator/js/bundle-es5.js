@@ -1,3 +1,259 @@
+var Display = (function () {
+    function Display(gameDiv, canvasWidth, canvasHeight) {
+        this.title = document.title;
+        this.countFrame = 0;
+        this.countCalc = 0;
+        this.nextFrameLog = 0;
+        this.lastFrameLog = 0;
+        this.animate = 0;
+        this.gameDiv = gameDiv;
+        gameDiv.style.width = canvasWidth + "px";
+        gameDiv.style.height = canvasHeight + "px";
+        gameDiv.style.backgroundColor = "#036";
+        this.canvasElement = document.createElement("canvas");
+        this.canvasElement.width = canvasWidth;
+        this.canvasElement.height = canvasHeight;
+        this.canvasContext = this.canvasElement.getContext("2d");
+        gameDiv.appendChild(this.canvasElement);
+        this.sprites = new Sprites();
+        this.setScale(5);
+        this.entityTransportBelt = new DisplayEntityTransportBelt();
+        this.entitySplitter = new DisplayEntitySplitter();
+    }
+    Display.prototype.setScale = function (scaleLevel) {
+        scaleLevel = Math.floor(scaleLevel);
+        if (scaleLevel > 6)
+            scaleLevel = 6;
+        if (scaleLevel < 0)
+            scaleLevel = 0;
+        if (scaleLevel !== this.scaleLevel) {
+            this.scaleLevel = scaleLevel;
+            this.scale = 4 << scaleLevel;
+        }
+    };
+    Display.prototype.calc = function () {
+        this.animate++;
+        this.countCalc++;
+    };
+    Display.prototype.draw = function (time) {
+        var _this = this;
+        if (!this.sprites || !this.sprites.hasLoaded())
+            return false;
+        this.entityTransportBelt.prepareForDisplay(this);
+        this.entitySplitter.prepareForDisplay(this);
+        var c = this.canvasContext;
+        var w = this.canvasElement.width;
+        var h = this.canvasElement.height;
+        c.imageSmoothingEnabled = false;
+        c.imageSmoothingQuality = "high";
+        if (this.scaleLevel > 1) {
+            c.clearRect(0, 0, w, h);
+            var gridWidth = Math.floor(this.sprites.tutorialGrid.width * this.scale / 64);
+            var gridHeight = Math.floor(this.sprites.tutorialGrid.height * this.scale / 64);
+            for (var y = 0; y < h; y += gridHeight) {
+                for (var x = -(y % gridWidth) * 6; x < w; x += gridWidth) {
+                    c.drawImage(this.sprites.tutorialGrid, x, y, gridWidth, gridHeight);
+                }
+            }
+        }
+        else {
+            c.fillStyle = "#848484";
+            c.fillRect(0, 0, w, w);
+        }
+        if (this.scaleLevel < 2)
+            c.imageSmoothingEnabled = true;
+        var belt = this.entityTransportBelt.draw;
+        var splitter = this.entitySplitter.draw;
+        belt(2, 1, 8);
+        belt(3, 1, 0);
+        belt(4, 1, 0);
+        belt(5, 1, 0);
+        belt(6, 1, 11);
+        belt(6, 2, 3);
+        belt(2, 3, 2);
+        belt(3, 3, 9);
+        belt(4, 3, 1);
+        belt(5, 3, 10);
+        belt(6, 3, 3);
+        belt(2, 4, 4);
+        belt(3, 4, 7);
+        belt(5, 4, 4);
+        belt(6, 4, 7);
+        belt(1, 1, 17);
+        splitter(1, 2, 0);
+        belt(1, 3, 12);
+        belt(7, 2, 14);
+        belt(8, 2, 0);
+        belt(9, 2, 11);
+        belt(10, 2, 9);
+        belt(11, 2, 1);
+        belt(12, 2, 18);
+        belt(7, 4, 15);
+        belt(8, 4, 1);
+        belt(9, 4, 7);
+        belt(10, 4, 5);
+        belt(11, 4, 0);
+        belt(12, 4, 19);
+        splitter(9, 3, 1);
+        var helpLines = function (x, y, width, height) {
+            c.beginPath();
+            c.strokeStyle = "#0f0";
+            c.lineWidth = 1;
+            var s = _this.scale;
+            for (var cy = 0; cy <= height; cy++) {
+                c.moveTo(x * s + 0.5, (y + cy) * s + 0.5);
+                c.lineTo((x + width) * s + 0.5, (y + cy) * s + 0.5);
+            }
+            for (var cx = 0; cx <= width; cx++) {
+                c.moveTo((x + cx) * s + 0.5, y * s + 0.5);
+                c.lineTo((x + cx) * s + 0.5, (y + height) * s + 0.5);
+            }
+            c.stroke();
+            c.closePath();
+        };
+        if (this.animate < 120) {
+            c.globalAlpha = Easing.easeInQuad((120 - this.animate) / 120);
+            c.fillStyle = "#000";
+            c.fillRect(0, 0, w, h);
+            c.globalAlpha = 1.0;
+        }
+        this.countFrame++;
+        if (time > this.nextFrameLog) {
+            if (this.countFrame > 0)
+                document.title = this.title + " - FPS " + (this.countFrame / (time - this.lastFrameLog) * 1000).toFixed(1) + ", UPS " + (this.countCalc / (time - this.lastFrameLog) * 1000).toFixed(1);
+            this.countFrame = 0;
+            this.countCalc = 0;
+            this.nextFrameLog += 1000;
+            this.lastFrameLog = time;
+            if (this.nextFrameLog < time)
+                this.nextFrameLog = time;
+        }
+        return true;
+    };
+    return Display;
+}());
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var DisplayEntity = (function () {
+    function DisplayEntity() {
+        this.draw = this.draw.bind(this);
+    }
+    DisplayEntity.prototype.prepareForDisplay = function (display) {
+        this.ctx = display.canvasContext;
+        this.ofsX = 0;
+        this.ofsY = 0;
+        this.scale = display.scale;
+        this.scaleX = display.scale;
+        this.scaleY = display.scale;
+        this.spriteW = 32;
+        this.spriteH = 32;
+        this.animate = display.animate;
+    };
+    DisplayEntity.prototype.draw = function (x, y, type, animate) {
+    };
+    return DisplayEntity;
+}());
+var DisplayEntityTransportBelt = (function (_super) {
+    __extends(DisplayEntityTransportBelt, _super);
+    function DisplayEntityTransportBelt() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    DisplayEntityTransportBelt.prototype.prepareForDisplay = function (display) {
+        _super.prototype.prepareForDisplay.call(this, display);
+        this.sprite = display.sprites.transportBelt;
+        this.ofsX -= this.scale * 0.5;
+        this.ofsY -= this.scale * 0.5;
+        this.scaleX *= 2;
+        this.scaleY *= 2;
+        this.spriteW = this.sprite.width / 16 >> 0;
+        this.spriteH = this.sprite.height / 20 >> 0;
+        this.animate &= 15;
+    };
+    DisplayEntityTransportBelt.prototype.draw = function (x, y, type) {
+        this.ctx.drawImage(this.sprite, this.animate * this.spriteW, type * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
+    };
+    return DisplayEntityTransportBelt;
+}(DisplayEntity));
+var DisplayEntitySplitterSouth = (function (_super) {
+    __extends(DisplayEntitySplitterSouth, _super);
+    function DisplayEntitySplitterSouth() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    DisplayEntitySplitterSouth.prototype.prepareForDisplay = function (display) {
+        _super.prototype.prepareForDisplay.call(this, display);
+        this.belt = display.entityTransportBelt;
+        this.sprite = display.sprites.splitterSouth;
+        this.ofsX -= this.scale * 0.15;
+        this.scaleX *= 2.55;
+        this.spriteW = this.sprite.width / 8 >> 0;
+        this.spriteH = this.sprite.height / 4 >> 0;
+        this.animate = this.animate * 0.70 & 31;
+    };
+    DisplayEntitySplitterSouth.prototype.draw = function (x, y, type, animate) {
+        this.belt.draw(x, y, 3);
+        this.belt.draw(x + 1, y, 3);
+        this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
+    };
+    return DisplayEntitySplitterSouth;
+}(DisplayEntity));
+var DisplayEntitySplitterNorth = (function (_super) {
+    __extends(DisplayEntitySplitterNorth, _super);
+    function DisplayEntitySplitterNorth() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    DisplayEntitySplitterNorth.prototype.prepareForDisplay = function (display) {
+        _super.prototype.prepareForDisplay.call(this, display);
+        this.belt = display.entityTransportBelt;
+        this.sprite = display.sprites.splitterNorth;
+        this.ofsX -= this.scale * 0.03;
+        this.scaleX *= 2.50;
+        this.spriteW = this.sprite.width / 8 >> 0;
+        this.spriteH = this.sprite.height / 4 >> 0;
+        this.animate = this.animate * 0.70 & 31;
+    };
+    DisplayEntitySplitterNorth.prototype.draw = function (x, y, type, animate) {
+        this.belt.draw(x, y, 2);
+        this.belt.draw(x + 1, y, 2);
+        this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
+    };
+    return DisplayEntitySplitterNorth;
+}(DisplayEntity));
+var DisplayEntitySplitter = (function (_super) {
+    __extends(DisplayEntitySplitter, _super);
+    function DisplayEntitySplitter() {
+        var _this = _super.call(this) || this;
+        _this.splitterNorth = new DisplayEntitySplitterNorth();
+        _this.splitterSouth = new DisplayEntitySplitterSouth();
+        return _this;
+    }
+    DisplayEntitySplitter.prototype.prepareForDisplay = function (display) {
+        _super.prototype.prepareForDisplay.call(this, display);
+        this.splitterNorth.prepareForDisplay(display);
+        this.splitterSouth.prepareForDisplay(display);
+    };
+    DisplayEntitySplitter.prototype.draw = function (x, y, type, animate) {
+        switch (type) {
+            case 0:
+                this.splitterNorth.draw(x, y, 0, animate);
+                break;
+            case 1:
+                this.splitterSouth.draw(x, y, 0, animate);
+                break;
+        }
+    };
+    return DisplayEntitySplitter;
+}(DisplayEntity));
 var Game = (function () {
     function Game(gameDiv, canvasWidth, canvasHeight) {
         this.calcTime = 0;
@@ -109,195 +365,4 @@ var Easing = {
     easeOutQuint: function (t) { return 1 + (--t) * t * t * t * t; },
     easeInOutQuint: function (t) { return t < .5 ? 16 * t * t * t * t * t : 1 + 16 * (--t) * t * t * t * t; }
 };
-var Display = (function () {
-    function Display(gameDiv, canvasWidth, canvasHeight) {
-        this.title = document.title;
-        this.countFrame = 0;
-        this.countCalc = 0;
-        this.nextFrameLog = 0;
-        this.lastFrameLog = 0;
-        this.animate = 0;
-        this.gameDiv = gameDiv;
-        gameDiv.style.width = canvasWidth + "px";
-        gameDiv.style.height = canvasHeight + "px";
-        gameDiv.style.backgroundColor = "#036";
-        this.canvasElement = document.createElement("canvas");
-        this.canvasElement.width = canvasWidth;
-        this.canvasElement.height = canvasHeight;
-        this.canvasContext = this.canvasElement.getContext("2d");
-        gameDiv.appendChild(this.canvasElement);
-        this.sprites = new Sprites();
-        this.setScale(5);
-        this.entityTransportBelt = new DisplayEntityTransportBelt();
-    }
-    Display.prototype.setScale = function (scaleLevel) {
-        scaleLevel = Math.floor(scaleLevel);
-        if (scaleLevel > 6)
-            scaleLevel = 6;
-        if (scaleLevel < 0)
-            scaleLevel = 0;
-        if (scaleLevel !== this.scaleLevel) {
-            this.scaleLevel = scaleLevel;
-            this.scale = 4 << scaleLevel;
-        }
-    };
-    Display.prototype.calc = function () {
-        this.animate++;
-        this.countCalc++;
-    };
-    Display.prototype.draw = function (time) {
-        var _this = this;
-        if (!this.sprites || !this.sprites.hasLoaded())
-            return false;
-        var sp = this.sprites;
-        var c = this.canvasContext;
-        var w = this.canvasElement.width;
-        var h = this.canvasElement.height;
-        this.entityTransportBelt.updateForDisplay(this);
-        c.imageSmoothingEnabled = false;
-        c.imageSmoothingQuality = "high";
-        if (this.scaleLevel > 1) {
-            c.clearRect(0, 0, w, h);
-            var gridWidth = Math.floor(this.sprites.tutorialGrid.width * this.scale / 64);
-            var gridHeight = Math.floor(this.sprites.tutorialGrid.height * this.scale / 64);
-            for (var y = 0; y < h; y += gridHeight) {
-                for (var x = -(y % gridWidth) * 6; x < w; x += gridWidth) {
-                    c.drawImage(this.sprites.tutorialGrid, x, y, gridWidth, gridHeight);
-                }
-            }
-        }
-        else {
-            c.fillStyle = "#848484";
-            c.fillRect(0, 0, w, w);
-        }
-        if (this.scaleLevel < 2)
-            c.imageSmoothingEnabled = true;
-        var animate2 = (this.animate * 0.70) & 31;
-        var belt = this.entityTransportBelt.draw;
-        belt(1, 1, 8);
-        belt(2, 1, 0);
-        belt(3, 1, 0);
-        belt(4, 1, 0);
-        belt(5, 1, 11);
-        belt(1, 2, 2);
-        belt(5, 2, 3);
-        belt(1, 3, 2);
-        belt(2, 3, 9);
-        belt(3, 3, 1);
-        belt(4, 3, 10);
-        belt(5, 3, 3);
-        belt(1, 4, 4);
-        belt(2, 4, 7);
-        belt(4, 4, 4);
-        belt(5, 4, 7);
-        var splOfsX = -this.scale * 0.15;
-        var splOfsY = -this.scale * 0.0;
-        var splW = Math.floor(sp.splitterSouth.width / 8);
-        var splH = Math.floor(sp.splitterSouth.height / 4);
-        belt(6, 2, 14);
-        belt(7, 2, 0);
-        belt(8, 2, 11);
-        belt(9, 2, 9);
-        belt(10, 2, 1);
-        belt(11, 2, 18);
-        belt(8, 3, 3);
-        belt(9, 3, 3);
-        belt(6, 4, 15);
-        belt(7, 4, 1);
-        belt(8, 4, 7);
-        belt(9, 4, 5);
-        belt(10, 4, 0);
-        belt(11, 4, 19);
-        c.drawImage(sp.splitterSouth, (animate2 & 7) * splW, (animate2 >> 3) * splH, splW, splH, 8 * this.scale + splOfsX, 3 * this.scale + splOfsY, this.scale * 2.55, this.scale);
-        var helpLines = function (x, y, width, height) {
-            c.beginPath();
-            c.strokeStyle = "#0f0";
-            c.lineWidth = 1;
-            var s = _this.scale;
-            for (var cy = 0; cy <= height; cy++) {
-                c.moveTo(x * s + 0.5, (y + cy) * s + 0.5);
-                c.lineTo((x + width) * s + 0.5, (y + cy) * s + 0.5);
-            }
-            for (var cx = 0; cx <= width; cx++) {
-                c.moveTo((x + cx) * s + 0.5, y * s + 0.5);
-                c.lineTo((x + cx) * s + 0.5, (y + height) * s + 0.5);
-            }
-            c.stroke();
-            c.closePath();
-        };
-        helpLines(7, 2, 4, 3);
-        if (this.animate < 120) {
-            c.globalAlpha = Easing.easeInQuad((120 - this.animate) / 120);
-            c.fillStyle = "#000";
-            c.fillRect(0, 0, w, h);
-            c.globalAlpha = 1.0;
-        }
-        this.countFrame++;
-        if (time > this.nextFrameLog) {
-            if (this.countFrame > 0)
-                document.title = this.title + " - FPS " + (this.countFrame / (time - this.lastFrameLog) * 1000).toFixed(1) + ", UPS " + (this.countCalc / (time - this.lastFrameLog) * 1000).toFixed(1);
-            this.countFrame = 0;
-            this.countCalc = 0;
-            this.nextFrameLog += 1000;
-            this.lastFrameLog = time;
-            if (this.nextFrameLog < time)
-                this.nextFrameLog = time;
-        }
-        return true;
-    };
-    return Display;
-}());
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var DisplayEntity = (function () {
-    function DisplayEntity() {
-        this.draw = this.draw.bind(this);
-    }
-    DisplayEntity.prototype.updateForDisplay = function (display) {
-        this.ctx = display.canvasContext;
-        this.ofsX = 0;
-        this.ofsY = 0;
-        this.scale = display.scale;
-        this.scaleX = display.scale;
-        this.scaleY = display.scale;
-        this.spriteW = 32;
-        this.spriteH = 32;
-        this.animate = display.animate;
-    };
-    DisplayEntity.prototype.draw = function (x, y, type, animate) {
-    };
-    return DisplayEntity;
-}());
-var DisplayEntityTransportBelt = (function (_super) {
-    __extends(DisplayEntityTransportBelt, _super);
-    function DisplayEntityTransportBelt() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    DisplayEntityTransportBelt.prototype.updateForDisplay = function (display) {
-        _super.prototype.updateForDisplay.call(this, display);
-        this.sprite = display.sprites.transportBelt;
-        this.ofsX -= this.scale * 0.5;
-        this.ofsY -= this.scale * 0.5;
-        this.scaleX *= 2;
-        this.scaleY *= 2;
-        this.spriteW = this.sprite.width / 16 >> 0;
-        this.spriteH = this.sprite.height / 20 >> 0;
-        this.animate &= 15;
-    };
-    DisplayEntityTransportBelt.prototype.draw = function (x, y, type) {
-        this.ctx.drawImage(this.sprite, this.animate * this.spriteW, type * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
-    };
-    return DisplayEntityTransportBelt;
-}(DisplayEntity));
 //# sourceMappingURL=bundle-es5.js.map
