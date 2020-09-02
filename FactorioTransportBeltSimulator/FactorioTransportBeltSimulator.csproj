@@ -61,6 +61,13 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="factorio\data\base\graphics\entity\splitter\hr-splitter-east-top_patch.png" />
+    <Content Include="factorio\data\base\graphics\entity\splitter\hr-splitter-east.png" />
+    <Content Include="factorio\data\base\graphics\entity\splitter\hr-splitter-north.png" />
+    <Content Include="factorio\data\base\graphics\entity\splitter\hr-splitter-south.png" />
+    <Content Include="factorio\data\base\graphics\entity\splitter\hr-splitter-west-top_patch.png" />
+    <Content Include="factorio\data\base\graphics\entity\splitter\hr-splitter-west.png" />
+    <Content Include="factorio\data\base\graphics\entity\transport-belt\hr-transport-belt.png" />
     <Content Include="factorio\data\base\graphics\terrain\tutorial-grid\hr-tutorial-grid1.png" />
     <Content Include="favicon.ico" />
     <None Include="bundleconfig.json" />
@@ -82,11 +89,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="factorio\data\base\graphics\entity\splitter\splitter-east.png" />
-    <Content Include="factorio\data\base\graphics\entity\splitter\splitter-north.png" />
-    <Content Include="factorio\data\base\graphics\entity\splitter\splitter-south.png" />
-    <Content Include="factorio\data\base\graphics\entity\splitter\splitter-west.png" />
-    <Content Include="factorio\data\base\graphics\entity\transport-belt\transport-belt.png" />
     <Content Include="factorio\data\base\graphics\entity\underground-belt\underground-belt-structure.png" />
     <Content Include="factorio\need_files.txt" />
     <Content Include="index.html" />

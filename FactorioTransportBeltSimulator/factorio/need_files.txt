@@ -12,9 +12,11 @@ if not exist "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\e
 if not exist "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\underground-belt" mkdir "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\underground-belt"
 
 copy /Y "%src%\data\base\graphics\terrain\tutorial-grid\hr-tutorial-grid1.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\terrain\tutorial-grid"
-copy /Y "%src%\data\base\graphics\entity\transport-belt\transport-belt.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\transport-belt"
+copy /Y "%src%\data\base\graphics\entity\transport-belt\hr-transport-belt.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\transport-belt"
+copy /Y "%src%\data\base\graphics\entity\splitter\hr-splitter-east-top_patch.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter"
 copy /Y "%src%\data\base\graphics\entity\splitter\hr-splitter-east.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter"
 copy /Y "%src%\data\base\graphics\entity\splitter\hr-splitter-north.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter"
 copy /Y "%src%\data\base\graphics\entity\splitter\hr-splitter-south.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter"
+copy /Y "%src%\data\base\graphics\entity\splitter\hr-splitter-west-top_patch.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter"
 copy /Y "%src%\data\base\graphics\entity\splitter\hr-splitter-west.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\splitter"
 copy /Y "%src%\data\base\graphics\entity\underground-belt\underground-belt-structure.png" "%dst%\FactorioTransportBeltSimulator\factorio\data\base\graphics\entity\underground-belt"

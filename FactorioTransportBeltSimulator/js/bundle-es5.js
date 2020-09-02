@@ -66,35 +66,28 @@ var Display = (function () {
         var splitter = this.entitySplitter.draw;
         belt(2, 1, 8);
         belt(3, 1, 0);
-        belt(4, 1, 0);
         belt(5, 1, 0);
         belt(6, 1, 11);
+        belt(1, 2, 17);
+        belt(2, 2, 2);
+        belt(3, 2, 14);
+        belt(5, 2, 19);
         belt(6, 2, 3);
-        belt(2, 3, 2);
-        belt(3, 3, 9);
-        belt(4, 3, 1);
-        belt(5, 3, 10);
-        belt(6, 3, 3);
-        belt(2, 4, 4);
-        belt(3, 4, 7);
-        belt(5, 4, 4);
-        belt(6, 4, 7);
-        belt(1, 1, 17);
-        splitter(1, 2, 0);
-        belt(1, 3, 12);
-        belt(7, 2, 14);
-        belt(8, 2, 0);
-        belt(9, 2, 11);
-        belt(10, 2, 9);
-        belt(11, 2, 1);
-        belt(12, 2, 18);
-        belt(7, 4, 15);
-        belt(8, 4, 1);
-        belt(9, 4, 7);
-        belt(10, 4, 5);
-        belt(11, 4, 0);
-        belt(12, 4, 19);
-        splitter(9, 3, 1);
+        belt(7, 2, 16);
+        splitter(4, 1, 3);
+        splitter(1, 3, 0);
+        splitter(6, 3, 1);
+        splitter(4, 4, 2);
+        belt(1, 4, 12);
+        belt(2, 4, 2);
+        belt(3, 4, 15);
+        belt(5, 4, 18);
+        belt(6, 4, 3);
+        belt(7, 4, 13);
+        belt(2, 5, 4);
+        belt(3, 5, 1);
+        belt(5, 5, 1);
+        belt(6, 5, 7);
         var helpLines = function (x, y, width, height) {
             c.beginPath();
             c.strokeStyle = "#0f0";
@@ -194,8 +187,8 @@ var DisplayEntitySplitterSouth = (function (_super) {
         _super.prototype.prepareForDisplay.call(this, display);
         this.belt = display.entityTransportBelt;
         this.sprite = display.sprites.splitterSouth;
-        this.ofsX -= this.scale * 0.15;
-        this.scaleX *= 2.55;
+        this.ofsX -= this.scale * 0.155;
+        this.scaleX *= 2.56;
         this.spriteW = this.sprite.width / 8 >> 0;
         this.spriteH = this.sprite.height / 4 >> 0;
         this.animate = this.animate * 0.70 & 31;
@@ -217,7 +210,9 @@ var DisplayEntitySplitterNorth = (function (_super) {
         this.belt = display.entityTransportBelt;
         this.sprite = display.sprites.splitterNorth;
         this.ofsX -= this.scale * 0.03;
-        this.scaleX *= 2.50;
+        this.ofsY -= this.scale * 0.05;
+        this.scaleX *= 2.5;
+        this.scaleY *= 1.1;
         this.spriteW = this.sprite.width / 8 >> 0;
         this.spriteH = this.sprite.height / 4 >> 0;
         this.animate = this.animate * 0.70 & 31;
@@ -229,18 +224,122 @@ var DisplayEntitySplitterNorth = (function (_super) {
     };
     return DisplayEntitySplitterNorth;
 }(DisplayEntity));
+var DisplayEntitySplitterWestTop = (function (_super) {
+    __extends(DisplayEntitySplitterWestTop, _super);
+    function DisplayEntitySplitterWestTop() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    DisplayEntitySplitterWestTop.prototype.prepareForDisplay = function (display) {
+        _super.prototype.prepareForDisplay.call(this, display);
+        this.belt = display.entityTransportBelt;
+        this.sprite = display.sprites.splitterWestTop;
+        this.spriteW = this.sprite.width / 8 >> 0;
+        this.spriteH = this.sprite.height / 4 >> 0;
+        this.ofsX -= this.scale * 0.015;
+        this.ofsY -= this.scale * 0.31;
+        this.scaleX *= 1.40;
+        this.scaleY *= 1.50;
+        this.animate = this.animate * 0.70 & 31;
+    };
+    DisplayEntitySplitterWestTop.prototype.draw = function (x, y, type, animate) {
+        this.belt.draw(x, y, 1);
+        this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
+    };
+    return DisplayEntitySplitterWestTop;
+}(DisplayEntity));
+var DisplayEntitySplitterWest = (function (_super) {
+    __extends(DisplayEntitySplitterWest, _super);
+    function DisplayEntitySplitterWest() {
+        var _this = _super.call(this) || this;
+        _this.top = new DisplayEntitySplitterWestTop();
+        return _this;
+    }
+    DisplayEntitySplitterWest.prototype.prepareForDisplay = function (display) {
+        _super.prototype.prepareForDisplay.call(this, display);
+        this.top.prepareForDisplay(display);
+        this.belt = display.entityTransportBelt;
+        this.sprite = display.sprites.splitterWest;
+        this.spriteW = this.sprite.width / 8 >> 0;
+        this.spriteH = this.sprite.height / 4 >> 0;
+        this.ofsX -= this.scale * 0.015;
+        this.ofsY -= this.scale * 0.30;
+        this.scaleX *= 1.40;
+        this.scaleY *= 1.35;
+        this.animate = this.animate * 0.70 & 31;
+    };
+    DisplayEntitySplitterWest.prototype.draw = function (x, y, type, animate) {
+        this.top.draw(x, y, type, animate);
+        this.belt.draw(x, y + 1, 1);
+        this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, (y + 1) * this.scale + this.ofsY, this.scaleX, this.scaleY);
+    };
+    return DisplayEntitySplitterWest;
+}(DisplayEntity));
+var DisplayEntitySplitterEastTop = (function (_super) {
+    __extends(DisplayEntitySplitterEastTop, _super);
+    function DisplayEntitySplitterEastTop() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    DisplayEntitySplitterEastTop.prototype.prepareForDisplay = function (display) {
+        _super.prototype.prepareForDisplay.call(this, display);
+        this.belt = display.entityTransportBelt;
+        this.sprite = display.sprites.splitterEastTop;
+        this.spriteW = this.sprite.width / 8 >> 0;
+        this.spriteH = this.sprite.height / 4 >> 0;
+        this.ofsX -= this.scale * 0.075;
+        this.ofsY -= this.scale * 0.435;
+        this.scaleX *= 1.40;
+        this.scaleY *= 1.62;
+        this.animate = this.animate * 0.70 & 31;
+    };
+    DisplayEntitySplitterEastTop.prototype.draw = function (x, y, type, animate) {
+        this.belt.draw(x, y, 0);
+        this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
+    };
+    return DisplayEntitySplitterEastTop;
+}(DisplayEntity));
+var DisplayEntitySplitterEast = (function (_super) {
+    __extends(DisplayEntitySplitterEast, _super);
+    function DisplayEntitySplitterEast() {
+        var _this = _super.call(this) || this;
+        _this.top = new DisplayEntitySplitterEastTop();
+        return _this;
+    }
+    DisplayEntitySplitterEast.prototype.prepareForDisplay = function (display) {
+        _super.prototype.prepareForDisplay.call(this, display);
+        this.top.prepareForDisplay(display);
+        this.belt = display.entityTransportBelt;
+        this.sprite = display.sprites.splitterEast;
+        this.spriteW = this.sprite.width / 8 >> 0;
+        this.spriteH = this.sprite.height / 4 >> 0;
+        this.ofsX -= this.scale * 0.075;
+        this.ofsY -= this.scale * 0.25;
+        this.scaleX *= 1.40;
+        this.scaleY *= 1.31;
+        this.animate = this.animate * 0.70 & 31;
+    };
+    DisplayEntitySplitterEast.prototype.draw = function (x, y, type, animate) {
+        this.top.draw(x, y, type, animate);
+        this.belt.draw(x, y + 1, 0);
+        this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, (y + 1) * this.scale + this.ofsY, this.scaleX, this.scaleY);
+    };
+    return DisplayEntitySplitterEast;
+}(DisplayEntity));
 var DisplayEntitySplitter = (function (_super) {
     __extends(DisplayEntitySplitter, _super);
     function DisplayEntitySplitter() {
         var _this = _super.call(this) || this;
         _this.splitterNorth = new DisplayEntitySplitterNorth();
         _this.splitterSouth = new DisplayEntitySplitterSouth();
+        _this.splitterWest = new DisplayEntitySplitterWest();
+        _this.splitterEast = new DisplayEntitySplitterEast();
         return _this;
     }
     DisplayEntitySplitter.prototype.prepareForDisplay = function (display) {
         _super.prototype.prepareForDisplay.call(this, display);
         this.splitterNorth.prepareForDisplay(display);
         this.splitterSouth.prepareForDisplay(display);
+        this.splitterWest.prepareForDisplay(display);
+        this.splitterEast.prepareForDisplay(display);
     };
     DisplayEntitySplitter.prototype.draw = function (x, y, type, animate) {
         switch (type) {
@@ -249,6 +348,12 @@ var DisplayEntitySplitter = (function (_super) {
                 break;
             case 1:
                 this.splitterSouth.draw(x, y, 0, animate);
+                break;
+            case 2:
+                this.splitterWest.draw(x, y, 0, animate);
+                break;
+            case 3:
+                this.splitterEast.draw(x, y, 0, animate);
                 break;
         }
     };
@@ -310,10 +415,12 @@ var Sprites = (function () {
         this.loadChecked = false;
         Sprites.loadImg("/factorio/data/base/graphics/terrain/tutorial-grid/hr-tutorial-grid1.png", function (img) { _this.tutorialGrid = img; });
         var path = "/factorio/data/base/graphics/entity/";
-        Sprites.loadImg(path + "transport-belt/transport-belt.png", function (img) { _this.transportBelt = img; });
-        Sprites.loadImg(path + "splitter/hr-splitter-east.png", function (img) { _this.splitterEast = img; });
+        Sprites.loadImg(path + "transport-belt/hr-transport-belt.png", function (img) { _this.transportBelt = img; });
         Sprites.loadImg(path + "splitter/hr-splitter-north.png", function (img) { _this.splitterNorth = img; });
         Sprites.loadImg(path + "splitter/hr-splitter-south.png", function (img) { _this.splitterSouth = img; });
+        Sprites.loadImg(path + "splitter/hr-splitter-east-top_patch.png", function (img) { _this.splitterEastTop = img; });
+        Sprites.loadImg(path + "splitter/hr-splitter-east.png", function (img) { _this.splitterEast = img; });
+        Sprites.loadImg(path + "splitter/hr-splitter-west-top_patch.png", function (img) { _this.splitterWestTop = img; });
         Sprites.loadImg(path + "splitter/hr-splitter-west.png", function (img) { _this.splitterWest = img; });
         Sprites.loadImg(path + "underground-belt/underground-belt-structure.png", function (img) { _this.undergroundBelt = img; });
     }
@@ -333,7 +440,11 @@ var Sprites = (function () {
     Sprites.prototype.hasLoaded = function () {
         if (this.loadChecked)
             return true;
-        var check = this.tutorialGrid && this.transportBelt && this.splitterEast && this.splitterNorth && this.splitterSouth && this.splitterWest && this.undergroundBelt && true;
+        var check = this.tutorialGrid
+            && this.transportBelt
+            && this.splitterNorth && this.splitterSouth && this.splitterWestTop && this.splitterWest && this.splitterEastTop && this.splitterEast
+            && this.undergroundBelt
+            && true;
         if (check)
             this.loadChecked = true;
         return check;

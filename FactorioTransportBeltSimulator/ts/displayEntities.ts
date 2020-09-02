@@ -67,8 +67,8 @@ class DisplayEntitySplitterSouth extends DisplayEntity
     super.prepareForDisplay(display);
     this.belt = display.entityTransportBelt;
     this.sprite = display.sprites.splitterSouth;
-    this.ofsX -= this.scale * 0.15;
-    this.scaleX *= 2.55;
+    this.ofsX -= this.scale * 0.155;
+    this.scaleX *= 2.56;
     this.spriteW = this.sprite.width / 8 >> 0;
     this.spriteH = this.sprite.height / 4 >> 0;
     this.animate = this.animate * 0.70 & 31;
@@ -92,7 +92,9 @@ class DisplayEntitySplitterNorth extends DisplayEntity
     this.belt = display.entityTransportBelt;
     this.sprite = display.sprites.splitterNorth;
     this.ofsX -= this.scale * 0.03;
-    this.scaleX *= 2.50;
+    this.ofsY -= this.scale * 0.05;
+    this.scaleX *= 2.5;
+    this.scaleY *= 1.1;
     this.spriteW = this.sprite.width / 8 >> 0;
     this.spriteH = this.sprite.height / 4 >> 0;
     this.animate = this.animate * 0.70 & 31;
@@ -106,16 +108,138 @@ class DisplayEntitySplitterNorth extends DisplayEntity
   }
 }
 
+class DisplayEntitySplitterWestTop extends DisplayEntity
+{
+  belt: DisplayEntityTransportBelt;
+
+  prepareForDisplay(display: Display)
+  {
+    super.prepareForDisplay(display);
+    this.belt = display.entityTransportBelt;
+    this.sprite = display.sprites.splitterWestTop;
+    this.spriteW = this.sprite.width / 8 >> 0;
+    this.spriteH = this.sprite.height / 4 >> 0;
+    this.ofsX -= this.scale * 0.015;
+    this.ofsY -= this.scale * 0.31;
+    this.scaleX *= 1.40;
+    this.scaleY *= 1.50;
+    this.animate = this.animate * 0.70 & 31;
+  }
+
+  draw(x: number, y: number, type: number, animate?: number)
+  {
+    this.belt.draw(x, y, 1);
+    this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
+  }
+}
+
+class DisplayEntitySplitterWest extends DisplayEntity
+{
+  top: DisplayEntitySplitterWestTop;
+  belt: DisplayEntityTransportBelt;
+
+  constructor()
+  {
+    super();
+    this.top = new DisplayEntitySplitterWestTop();
+  }
+
+  prepareForDisplay(display: Display)
+  {
+    super.prepareForDisplay(display);
+    this.top.prepareForDisplay(display);
+    this.belt = display.entityTransportBelt;
+    this.sprite = display.sprites.splitterWest;
+    this.spriteW = this.sprite.width / 8 >> 0;
+    this.spriteH = this.sprite.height / 4 >> 0;
+    this.ofsX -= this.scale * 0.015;
+    this.ofsY -= this.scale * 0.30;
+    this.scaleX *= 1.40;
+    this.scaleY *= 1.35;
+    this.animate = this.animate * 0.70 & 31;
+  }
+
+  draw(x: number, y: number, type: number, animate?: number)
+  {
+    this.top.draw(x, y, type, animate);
+    this.belt.draw(x, y + 1, 1);
+    this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, (y + 1) * this.scale + this.ofsY, this.scaleX, this.scaleY);
+  }
+}
+
+class DisplayEntitySplitterEastTop extends DisplayEntity
+{
+  belt: DisplayEntityTransportBelt;
+
+  prepareForDisplay(display: Display)
+  {
+    super.prepareForDisplay(display);
+    this.belt = display.entityTransportBelt;
+    this.sprite = display.sprites.splitterEastTop;
+    this.spriteW = this.sprite.width / 8 >> 0;
+    this.spriteH = this.sprite.height / 4 >> 0;
+    this.ofsX -= this.scale * 0.075;
+    this.ofsY -= this.scale * 0.435;
+    this.scaleX *= 1.40;
+    this.scaleY *= 1.62;
+    this.animate = this.animate * 0.70 & 31;
+  }
+
+  draw(x: number, y: number, type: number, animate?: number)
+  {
+    this.belt.draw(x, y, 0);
+    this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
+  }
+}
+
+class DisplayEntitySplitterEast extends DisplayEntity
+{
+  top: DisplayEntitySplitterEastTop;
+  belt: DisplayEntityTransportBelt;
+
+  constructor()
+  {
+    super();
+    this.top = new DisplayEntitySplitterEastTop();
+  }
+
+  prepareForDisplay(display: Display)
+  {
+    super.prepareForDisplay(display);
+    this.top.prepareForDisplay(display);
+    this.belt = display.entityTransportBelt;
+    this.sprite = display.sprites.splitterEast;
+    this.spriteW = this.sprite.width / 8 >> 0;
+    this.spriteH = this.sprite.height / 4 >> 0;
+    this.ofsX -= this.scale * 0.075;
+    this.ofsY -= this.scale * 0.25;
+    this.scaleX *= 1.40;
+    this.scaleY *= 1.31;
+    this.animate = this.animate * 0.70 & 31;
+  }
+
+  draw(x: number, y: number, type: number, animate?: number)
+  {
+    this.top.draw(x, y, type, animate);
+    this.belt.draw(x, y + 1, 0);
+    this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, (y + 1) * this.scale + this.ofsY, this.scaleX, this.scaleY);
+  }
+}
+
 class DisplayEntitySplitter extends DisplayEntity
 {
   splitterNorth: DisplayEntitySplitterNorth;
   splitterSouth: DisplayEntitySplitterSouth;
+  splitterWest: DisplayEntitySplitterWest;
+  splitterEast: DisplayEntitySplitterEast;
 
   constructor()
   {
     super();
     this.splitterNorth = new DisplayEntitySplitterNorth();
     this.splitterSouth = new DisplayEntitySplitterSouth();
+    this.splitterWest = new DisplayEntitySplitterWest();
+    this.splitterEast = new DisplayEntitySplitterEast();
   }
 
   prepareForDisplay(display: Display)
@@ -123,6 +247,8 @@ class DisplayEntitySplitter extends DisplayEntity
     super.prepareForDisplay(display);
     this.splitterNorth.prepareForDisplay(display);
     this.splitterSouth.prepareForDisplay(display);
+    this.splitterWest.prepareForDisplay(display);
+    this.splitterEast.prepareForDisplay(display);
   }
 
   draw(x: number, y: number, type: number, animate?: number)
@@ -131,6 +257,8 @@ class DisplayEntitySplitter extends DisplayEntity
     {
       case 0: this.splitterNorth.draw(x, y, 0, animate); break;
       case 1: this.splitterSouth.draw(x, y, 0, animate); break;
+      case 2: this.splitterWest.draw(x, y, 0, animate); break;
+      case 3: this.splitterEast.draw(x, y, 0, animate); break;
     }
   }
 }

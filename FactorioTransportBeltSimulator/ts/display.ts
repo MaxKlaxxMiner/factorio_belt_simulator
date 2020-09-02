@@ -9,8 +9,6 @@ class Display
   sprites: Sprites;
 
   entityTransportBelt: DisplayEntity;
-  entitySplitterSouth: DisplayEntity;
-  entitySplitterNorth: DisplayEntity;
   entitySplitter: DisplayEntity;
 
   constructor(gameDiv: HTMLElement, canvasWidth: number, canvasHeight: number)
@@ -122,18 +120,14 @@ class Display
     // 18 = void -> left
     // 19 = left -> void
 
-    belt(2, 1, 8); belt(3, 1, 0); belt(4, 1, 0); belt(5, 1, 0); belt(6, 1, 11);
-    belt(6, 2, 3);
-    belt(2, 3, 2); belt(3, 3, 9); belt(4, 3, 1); belt(5, 3, 10); belt(6, 3, 3);
-    belt(2, 4, 4); belt(3, 4, 7); belt(5, 4, 4); belt(6, 4, 7);
+    belt(2, 1, 8); belt(3, 1, 0); belt(5, 1, 0); belt(6, 1, 11);
+    belt(1, 2, 17); belt(2, 2, 2); belt(3, 2, 14); belt(5, 2, 19); belt(6, 2, 3); belt(7, 2, 16);
+    splitter(4, 1, 3);
+    splitter(1, 3, 0); splitter(6, 3, 1);
+    splitter(4, 4, 2);
+    belt(1, 4, 12); belt(2, 4, 2); belt(3, 4, 15); belt(5, 4, 18); belt(6, 4, 3); belt(7, 4, 13);
+    belt(2, 5, 4); belt(3, 5, 1); belt(5, 5, 1); belt(6, 5, 7);
 
-    belt(1, 1, 17);
-    splitter(1, 2, 0);
-    belt(1, 3, 12);
-
-    belt(7, 2, 14); belt(8, 2, 0); belt(9, 2, 11); belt(10, 2, 9); belt(11, 2, 1); belt(12, 2, 18);
-    belt(7, 4, 15); belt(8, 4, 1); belt(9, 4, 7); belt(10, 4, 5); belt(11, 4, 0); belt(12, 4, 19);
-    splitter(9, 3, 1);
 
     // --- Helper lines ---
     const helpLines = (x: number, y: number, width: number, height: number) =>
@@ -156,6 +150,7 @@ class Display
       c.closePath();
     };
 
+    //helpLines(3, 3, 3, 4);
     //helpLines(8, 2, 4, 3);
 
     // --- Final ---
