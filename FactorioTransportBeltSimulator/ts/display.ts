@@ -26,7 +26,7 @@ class Display
 
     this.sprites = new Sprites();
 
-    this.setScale(5);
+    this.setScale(22);
 
     this.entityTransportBelt = new DisplayEntityTransportBelt();
     this.entitySplitter = new DisplayEntitySplitter();
@@ -40,15 +40,18 @@ class Display
   scaleLevel: number;
   scale: number;
 
+  zoomLevels = [2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 19, 22, 26, 30, 36, 42, 49, 57, 67, 79, 93, 109, 128, 151, 178, 209];
+
   setScale(scaleLevel: number): void
   {
     scaleLevel = Math.floor(scaleLevel);
-    if (scaleLevel > 6) scaleLevel = 6;
+    if (scaleLevel >= this.zoomLevels.length) scaleLevel = this.zoomLevels.length - 1;
     if (scaleLevel < 0) scaleLevel = 0;
     if (scaleLevel !== this.scaleLevel)
     {
       this.scaleLevel = scaleLevel;
-      this.scale = 4 << scaleLevel;
+      this.scale = this.zoomLevels[scaleLevel];
+      this.draw(performance.now()); // fast redraw
     }
   }
 
@@ -73,7 +76,7 @@ class Display
     c.imageSmoothingQuality = "high";
 
     // --- Background (tutorial-grid) ---
-    if (this.scaleLevel > 1)
+    if (this.scaleLevel >= 8)
     {
       c.clearRect(0, 0, w, h);
 
@@ -150,8 +153,15 @@ class Display
       c.closePath();
     };
 
-    //helpLines(3, 3, 3, 4);
-    //helpLines(8, 2, 4, 3);
+    const mx = mouseX / this.scale >> 0;
+    const my = mouseY / this.scale >> 0;
+    if (mouseX + mouseY > 0)
+    {
+      c.globalAlpha = 0.7;
+      belt(mx - 1, my, 14); belt(mx, my, 0); belt(mx + 1, my, 19);
+      c.globalAlpha = 1;
+    }
+    //helpLines(mx, my, 1, 1);
 
     // --- Final ---
     if (this.animate < 120)

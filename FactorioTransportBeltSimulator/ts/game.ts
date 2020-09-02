@@ -9,6 +9,7 @@ class Game
     this.display = new Display(gameDiv, canvasWidth, canvasHeight);
   }
 
+  lastWheel = 0;
   uiUpdate(): void
   {
     if (keys[107]) // numpad +
@@ -20,6 +21,18 @@ class Game
     {
       keys[109] = false;
       this.display.setScale(this.display.scaleLevel - 1);
+    }
+    if (this.lastWheel !== mouseWheel)
+    {
+      if (mouseWheel < this.lastWheel)
+      {
+        this.display.setScale(this.display.scaleLevel + 1);
+      }
+      else
+      {
+        this.display.setScale(this.display.scaleLevel - 1);
+      }
+      this.lastWheel = mouseWheel;
     }
   }
 
@@ -45,6 +58,12 @@ class Game
 
   static run(): void
   {
+    // --- init ---
+    const docSize = getDocumentSize();
+    const div = document.getElementById("game");
+    game = new Game(div, docSize.width, docSize.height);
+
+    // --- key events ---
     document.body.onkeydown = (e: KeyboardEvent) =>
     {
       console.log("key pressed: " + e.keyCode);
@@ -55,15 +74,35 @@ class Game
       keys[e.keyCode] = false;
     };
 
-    const docSize = getDocumentSize();
-    const div = document.getElementById("game");
-    game = new Game(div, docSize.width, docSize.height);
+    // --- mouse events ---
+    document.addEventListener("contextmenu", event => event.preventDefault()); // disable context menu (right mouse click)
+
+    window.onmousewheel = (m: MouseWheelEvent) =>
+    {
+      if (m.deltaY > 0) mouseWheel++; else mouseWheel--;
+    };
+
+    const mouseEvent = (m: MouseEvent) =>
+    {
+      mouseX = m.x;
+      mouseY = m.y;
+      mouseButtons = m.buttons;
+    };
+
+    div.onmousedown = mouseEvent;
+    div.onmousemove = mouseEvent;
+    div.onmouseup = mouseEvent;
+
+    // --- run game-loop --
 
     //window.setInterval(() => game.draw(), 8); // 125 FPS test
-
-    const run = () => { requestAnimFrame(run); game.draw(); }; run();
+    const run = () => { requestAnimFrame(run); game.draw(); }; run(); // vsync
   }
 }
 
 const keys: { [key: number]: boolean } = {};
+let mouseX = 0;
+let mouseY = 0;
+let mouseButtons = 0;
+let mouseWheel = 0;
 let game: Game;

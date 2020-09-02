@@ -6,6 +6,7 @@ var Display = (function () {
         this.nextFrameLog = 0;
         this.lastFrameLog = 0;
         this.animate = 0;
+        this.zoomLevels = [2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 19, 22, 26, 30, 36, 42, 49, 57, 67, 79, 93, 109, 128, 151, 178, 209];
         this.gameDiv = gameDiv;
         gameDiv.style.width = canvasWidth + "px";
         gameDiv.style.height = canvasHeight + "px";
@@ -16,19 +17,20 @@ var Display = (function () {
         this.canvasContext = this.canvasElement.getContext("2d");
         gameDiv.appendChild(this.canvasElement);
         this.sprites = new Sprites();
-        this.setScale(5);
+        this.setScale(22);
         this.entityTransportBelt = new DisplayEntityTransportBelt();
         this.entitySplitter = new DisplayEntitySplitter();
     }
     Display.prototype.setScale = function (scaleLevel) {
         scaleLevel = Math.floor(scaleLevel);
-        if (scaleLevel > 6)
-            scaleLevel = 6;
+        if (scaleLevel >= this.zoomLevels.length)
+            scaleLevel = this.zoomLevels.length - 1;
         if (scaleLevel < 0)
             scaleLevel = 0;
         if (scaleLevel !== this.scaleLevel) {
             this.scaleLevel = scaleLevel;
-            this.scale = 4 << scaleLevel;
+            this.scale = this.zoomLevels[scaleLevel];
+            this.draw(performance.now());
         }
     };
     Display.prototype.calc = function () {
@@ -46,7 +48,7 @@ var Display = (function () {
         var h = this.canvasElement.height;
         c.imageSmoothingEnabled = false;
         c.imageSmoothingQuality = "high";
-        if (this.scaleLevel > 1) {
+        if (this.scaleLevel >= 8) {
             c.clearRect(0, 0, w, h);
             var gridWidth = Math.floor(this.sprites.tutorialGrid.width * this.scale / 64);
             var gridHeight = Math.floor(this.sprites.tutorialGrid.height * this.scale / 64);
@@ -104,6 +106,15 @@ var Display = (function () {
             c.stroke();
             c.closePath();
         };
+        var mx = mouseX / this.scale >> 0;
+        var my = mouseY / this.scale >> 0;
+        if (mouseX + mouseY > 0) {
+            c.globalAlpha = 0.7;
+            belt(mx - 1, my, 14);
+            belt(mx, my, 0);
+            belt(mx + 1, my, 19);
+            c.globalAlpha = 1;
+        }
         if (this.animate < 120) {
             c.globalAlpha = Easing.easeInQuad((120 - this.animate) / 120);
             c.fillStyle = "#000";
@@ -373,6 +384,7 @@ var DisplayEntitySplitter = (function (_super) {
 }(DisplayEntity));
 var Game = (function () {
     function Game(gameDiv, canvasWidth, canvasHeight) {
+        this.lastWheel = 0;
         this.calcTime = 0;
         this.display = new Display(gameDiv, canvasWidth, canvasHeight);
     }
@@ -384,6 +396,15 @@ var Game = (function () {
         if (keys[109]) {
             keys[109] = false;
             this.display.setScale(this.display.scaleLevel - 1);
+        }
+        if (this.lastWheel !== mouseWheel) {
+            if (mouseWheel < this.lastWheel) {
+                this.display.setScale(this.display.scaleLevel + 1);
+            }
+            else {
+                this.display.setScale(this.display.scaleLevel - 1);
+            }
+            this.lastWheel = mouseWheel;
         }
     };
     Game.prototype.calc = function () {
@@ -404,6 +425,9 @@ var Game = (function () {
                 this.calc();
     };
     Game.run = function () {
+        var docSize = getDocumentSize();
+        var div = document.getElementById("game");
+        game = new Game(div, docSize.width, docSize.height);
         document.body.onkeydown = function (e) {
             console.log("key pressed: " + e.keyCode);
             keys[e.keyCode] = true;
@@ -411,15 +435,31 @@ var Game = (function () {
         document.body.onkeyup = function (e) {
             keys[e.keyCode] = false;
         };
-        var docSize = getDocumentSize();
-        var div = document.getElementById("game");
-        game = new Game(div, docSize.width, docSize.height);
+        document.addEventListener("contextmenu", function (event) { return event.preventDefault(); });
+        window.onmousewheel = function (m) {
+            if (m.deltaY > 0)
+                mouseWheel++;
+            else
+                mouseWheel--;
+        };
+        var mouseEvent = function (m) {
+            mouseX = m.x;
+            mouseY = m.y;
+            mouseButtons = m.buttons;
+        };
+        div.onmousedown = mouseEvent;
+        div.onmousemove = mouseEvent;
+        div.onmouseup = mouseEvent;
         var run = function () { requestAnimFrame(run); game.draw(); };
         run();
     };
     return Game;
 }());
 var keys = {};
+var mouseX = 0;
+var mouseY = 0;
+var mouseButtons = 0;
+var mouseWheel = 0;
 var game;
 var Sprites = (function () {
     function Sprites() {
