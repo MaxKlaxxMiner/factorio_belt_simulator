@@ -122,9 +122,9 @@ class Display
 
     belt(2, 1, 8); belt(3, 1, 0); belt(5, 1, 0); belt(6, 1, 11);
     belt(1, 2, 17); belt(2, 2, 2); belt(3, 2, 14); belt(5, 2, 19); belt(6, 2, 3); belt(7, 2, 16);
-    splitter(4, 1, 3);
-    splitter(1, 3, 0); splitter(6, 3, 1);
-    splitter(4, 4, 2);
+    splitter(4, 1, 3, this.animate & 31);
+    splitter(1, 3, 0); splitter(6, 3, 1, this.animate * 0.2 & 31);
+    splitter(4, 4, 2, this.animate * 2 & 31);
     belt(1, 4, 12); belt(2, 4, 2); belt(3, 4, 15); belt(5, 4, 18); belt(6, 4, 3); belt(7, 4, 13);
     belt(2, 5, 4); belt(3, 5, 1); belt(5, 5, 1); belt(6, 5, 7);
 

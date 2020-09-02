@@ -74,10 +74,10 @@ var Display = (function () {
         belt(5, 2, 19);
         belt(6, 2, 3);
         belt(7, 2, 16);
-        splitter(4, 1, 3);
+        splitter(4, 1, 3, this.animate & 31);
         splitter(1, 3, 0);
-        splitter(6, 3, 1);
-        splitter(4, 4, 2);
+        splitter(6, 3, 1, this.animate * 0.2 & 31);
+        splitter(4, 4, 2, this.animate * 2 & 31);
         belt(1, 4, 12);
         belt(2, 4, 2);
         belt(3, 4, 15);
@@ -196,7 +196,9 @@ var DisplayEntitySplitterSouth = (function (_super) {
     DisplayEntitySplitterSouth.prototype.draw = function (x, y, type, animate) {
         this.belt.draw(x, y, 3);
         this.belt.draw(x + 1, y, 3);
-        this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
+        if (animate === undefined)
+            animate = this.animate;
+        this.ctx.drawImage(this.sprite, (animate & 7) * this.spriteW, (animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
     };
     return DisplayEntitySplitterSouth;
 }(DisplayEntity));
@@ -220,7 +222,9 @@ var DisplayEntitySplitterNorth = (function (_super) {
     DisplayEntitySplitterNorth.prototype.draw = function (x, y, type, animate) {
         this.belt.draw(x, y, 2);
         this.belt.draw(x + 1, y, 2);
-        this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
+        if (animate === undefined)
+            animate = this.animate;
+        this.ctx.drawImage(this.sprite, (animate & 7) * this.spriteW, (animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
     };
     return DisplayEntitySplitterNorth;
 }(DisplayEntity));
@@ -243,7 +247,9 @@ var DisplayEntitySplitterWestTop = (function (_super) {
     };
     DisplayEntitySplitterWestTop.prototype.draw = function (x, y, type, animate) {
         this.belt.draw(x, y, 1);
-        this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
+        if (animate === undefined)
+            animate = this.animate;
+        this.ctx.drawImage(this.sprite, (animate & 7) * this.spriteW, (animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
     };
     return DisplayEntitySplitterWestTop;
 }(DisplayEntity));
@@ -270,7 +276,9 @@ var DisplayEntitySplitterWest = (function (_super) {
     DisplayEntitySplitterWest.prototype.draw = function (x, y, type, animate) {
         this.top.draw(x, y, type, animate);
         this.belt.draw(x, y + 1, 1);
-        this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, (y + 1) * this.scale + this.ofsY, this.scaleX, this.scaleY);
+        if (animate === undefined)
+            animate = this.animate;
+        this.ctx.drawImage(this.sprite, (animate & 7) * this.spriteW, (animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, (y + 1) * this.scale + this.ofsY, this.scaleX, this.scaleY);
     };
     return DisplayEntitySplitterWest;
 }(DisplayEntity));
@@ -293,7 +301,9 @@ var DisplayEntitySplitterEastTop = (function (_super) {
     };
     DisplayEntitySplitterEastTop.prototype.draw = function (x, y, type, animate) {
         this.belt.draw(x, y, 0);
-        this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
+        if (animate === undefined)
+            animate = this.animate;
+        this.ctx.drawImage(this.sprite, (animate & 7) * this.spriteW, (animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
     };
     return DisplayEntitySplitterEastTop;
 }(DisplayEntity));
@@ -320,7 +330,9 @@ var DisplayEntitySplitterEast = (function (_super) {
     DisplayEntitySplitterEast.prototype.draw = function (x, y, type, animate) {
         this.top.draw(x, y, type, animate);
         this.belt.draw(x, y + 1, 0);
-        this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, (y + 1) * this.scale + this.ofsY, this.scaleX, this.scaleY);
+        if (animate === undefined)
+            animate = this.animate;
+        this.ctx.drawImage(this.sprite, (animate & 7) * this.spriteW, (animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, (y + 1) * this.scale + this.ofsY, this.scaleX, this.scaleY);
     };
     return DisplayEntitySplitterEast;
 }(DisplayEntity));

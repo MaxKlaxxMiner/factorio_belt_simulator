@@ -78,7 +78,8 @@ class DisplayEntitySplitterSouth extends DisplayEntity
   {
     this.belt.draw(x, y, 3);
     this.belt.draw(x + 1, y, 3);
-    this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
+    if (animate === undefined) animate = this.animate;
+    this.ctx.drawImage(this.sprite, (animate & 7) * this.spriteW, (animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
   }
 }
 
@@ -104,7 +105,8 @@ class DisplayEntitySplitterNorth extends DisplayEntity
   {
     this.belt.draw(x, y, 2);
     this.belt.draw(x + 1, y, 2);
-    this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
+    if (animate === undefined) animate = this.animate;
+    this.ctx.drawImage(this.sprite, (animate & 7) * this.spriteW, (animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
   }
 }
 
@@ -129,7 +131,8 @@ class DisplayEntitySplitterWestTop extends DisplayEntity
   draw(x: number, y: number, type: number, animate?: number)
   {
     this.belt.draw(x, y, 1);
-    this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
+    if (animate === undefined) animate = this.animate;
+    this.ctx.drawImage(this.sprite, (animate & 7) * this.spriteW, (animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
   }
 }
 
@@ -163,7 +166,8 @@ class DisplayEntitySplitterWest extends DisplayEntity
   {
     this.top.draw(x, y, type, animate);
     this.belt.draw(x, y + 1, 1);
-    this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, (y + 1) * this.scale + this.ofsY, this.scaleX, this.scaleY);
+    if (animate === undefined) animate = this.animate;
+    this.ctx.drawImage(this.sprite, (animate & 7) * this.spriteW, (animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, (y + 1) * this.scale + this.ofsY, this.scaleX, this.scaleY);
   }
 }
 
@@ -188,7 +192,8 @@ class DisplayEntitySplitterEastTop extends DisplayEntity
   draw(x: number, y: number, type: number, animate?: number)
   {
     this.belt.draw(x, y, 0);
-    this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
+    if (animate === undefined) animate = this.animate;
+    this.ctx.drawImage(this.sprite, (animate & 7) * this.spriteW, (animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
   }
 }
 
@@ -222,7 +227,8 @@ class DisplayEntitySplitterEast extends DisplayEntity
   {
     this.top.draw(x, y, type, animate);
     this.belt.draw(x, y + 1, 0);
-    this.ctx.drawImage(this.sprite, (this.animate & 7) * this.spriteW, (this.animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, (y + 1) * this.scale + this.ofsY, this.scaleX, this.scaleY);
+    if (animate === undefined) animate = this.animate;
+    this.ctx.drawImage(this.sprite, (animate & 7) * this.spriteW, (animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, (y + 1) * this.scale + this.ofsY, this.scaleX, this.scaleY);
   }
 }
 
