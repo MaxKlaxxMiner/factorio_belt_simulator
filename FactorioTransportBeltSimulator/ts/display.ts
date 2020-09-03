@@ -9,8 +9,8 @@ class Display
   sprites: Sprites;
   map: Map;
 
-  entityTransportBelt: DisplayEntity;
-  entitySplitter: DisplayEntity;
+  entityTransportBelt: DisplayEntityTransportBelt;
+  entitySplitter: DisplayEntitySplitter;
 
   constructor(gameDiv: HTMLElement, canvasWidth: number, canvasHeight: number, map: Map)
   {
@@ -27,7 +27,7 @@ class Display
 
     this.sprites = new Sprites();
 
-    this.setScale(22);
+    this.setScale(18);
 
     this.entityTransportBelt = new DisplayEntityTransportBelt();
     this.entitySplitter = new DisplayEntitySplitter();
@@ -53,7 +53,6 @@ class Display
     {
       this.scaleLevel = scaleLevel;
       this.scale = this.zoomLevels[scaleLevel];
-      this.draw(performance.now()); // fast redraw
     }
   }
 
@@ -65,9 +64,9 @@ class Display
 
   draw(time: number): boolean
   {
+    // --- pipeline step 0: prepare ---
     if (!this.sprites || !this.sprites.hasLoaded()) return false; // missing sprites?
 
-    // todo: loop elements
     this.entityTransportBelt.prepareForDisplay(this);
     this.entitySplitter.prepareForDisplay(this);
 
@@ -77,7 +76,7 @@ class Display
     c.imageSmoothingEnabled = false;
     c.imageSmoothingQuality = "high";
 
-    // --- Background (tutorial-grid) ---
+    // --- pipeline step 1: background (tutorial-grid) ---
     if (this.scaleLevel >= 8)
     {
       c.clearRect(0, 0, w, h);
@@ -99,65 +98,104 @@ class Display
     }
     if (this.scaleLevel < 2) c.imageSmoothingEnabled = true;
 
-    // --- Entities ---
+    // --- Entities-Methods ---
     const belt = this.entityTransportBelt.draw;
     const splitter = this.entitySplitter.draw;
 
-    // --- belts ---
-    //  0 = left -> right
-    //  1 = right -> left
-    //  2 = bottom -> top
-    //  3 = top -> bottom
-    //  4 = right -> top
-    //  5 = top -> right
-    //  6 = left -> top
-    //  7 = top -> left
-    //  8 = bottom -> right
-    //  9 = right -> bottom
-    // 10 = bottom -> left
-    // 11 = left -> bottom
-    // 12 = void -> top
-    // 13 = top -> void
-    // 14 = void -> right
-    // 15 = right -> void
-    // 16 = void -> bottom
-    // 17 = bottom -> void
-    // 18 = void -> left
-    // 19 = left -> void
-
-    //belt(2, 1, 8); belt(3, 1, 0); belt(5, 1, 0); belt(6, 1, 11);
-    //belt(1, 2, 17); belt(2, 2, 2); belt(3, 2, 14); belt(5, 2, 19); belt(6, 2, 3); belt(7, 2, 16);
-    //splitter(4, 1, 3, this.animate & 31);
-    //splitter(1, 3, 0); splitter(6, 3, 1, this.animate * 0.2 & 31);
-    //splitter(4, 4, 2, this.animate * 2 & 31);
-    //belt(1, 4, 12); belt(2, 4, 2); belt(3, 4, 15); belt(5, 4, 18); belt(6, 4, 3); belt(7, 4, 13);
-    //belt(2, 5, 4); belt(3, 5, 1); belt(5, 5, 1); belt(6, 5, 7);
-
     //todo: optimize viewport
-    const lines = this.map.entityLines;
-    for (let y = 0; y < lines.length; y++)
+
+    // --- pipeline step 2: draw transport belts ---
+    this.map.callEntities(0, 0, 100, 100, (x, y, e) =>
     {
-      const line = lines[y];
-      if (!line) continue;
-      for (let x = line.firstX; x <= line.lastX; x++)
+      switch (e.t)
       {
-        const entity = line[x];
-        if (!entity) continue;
-        switch (entity.e)
-        {
-          case EntityType.transportBelt: {
-            switch (entity.d) // direction
-            {
-              case 1: { // right
-                if (!entity.ln) belt(x - 1, y, 14);
-                belt(x, y, 0);
-                if (!entity.rn) belt(x + 1, y, 19);
-              } break;
-            }
-          } break;
-        }
+        case EntityType.transportBelt: {
+          switch (e.d) // direction
+          {
+            case Direction.top: {
+              if (e.fromBottom() || e.fromLeft() === e.fromRight())
+              {
+                belt(x, y, BeltType.bottomToTop);
+              }
+              else // curve?
+              {
+                if (e.fromLeft()) belt(x, y, BeltType.leftToTop);
+                if (e.fromRight()) belt(x, y, BeltType.rightToTop);
+              }
+            } break;
+
+            case Direction.right: {
+              if (e.fromLeft() || e.fromTop() === e.fromBottom())
+              {
+                belt(x, y, BeltType.leftToRight);
+              }
+              else // curve?
+              {
+                if (e.fromTop()) belt(x, y, BeltType.topToRight);
+                if (e.fromBottom()) belt(x, y, BeltType.bottomToRight);
+              }
+            } break;
+
+            case Direction.bottom: {
+              if (e.fromTop() || e.fromLeft() === e.fromRight())
+              {
+                belt(x, y, BeltType.topToBottom);
+              }
+              else // curve?
+              {
+                if (e.fromLeft()) belt(x, y, BeltType.leftToBottom);
+                if (e.fromRight()) belt(x, y, BeltType.rightToBottom);
+              }
+            } break;
+
+            case Direction.left: {
+              if (e.fromRight() || e.fromTop() === e.fromBottom())
+              {
+                belt(x, y, BeltType.rightToLeft);
+              }
+              else // curve?
+              {
+                if (e.fromTop()) belt(x, y, BeltType.topToLeft);
+                if (e.fromBottom()) belt(x, y, BeltType.bottomToLeft);
+              }
+            } break;
+          }
+        } break;
       }
-    }
+    });
+
+    // --- pipeline step 3: draw belt additives ---
+    this.map.callEntities(0, 0, 100, 100, (x, y, e) =>
+    {
+      switch (e.t)
+      {
+        case EntityType.transportBelt: {
+          switch (e.d) // direction
+          {
+            case Direction.right: {
+            } break;
+          }
+        } break;
+      }
+    });
+
+    // --- pipeline step 4: draw entities ---
+    this.map.callEntities(0, 0, 100, 100, (x, y, e) =>
+    {
+      switch (e.t)
+      {
+        case EntityType.transportBelt: {
+          switch (e.d) // direction
+          {
+            case Direction.right: {
+            } break;
+            case Direction.bottom: {
+            } break;
+          }
+        } break;
+      }
+    });
+
 
     // --- Helper lines ---
     const helpLines = (x: number, y: number, width: number, height: number) =>

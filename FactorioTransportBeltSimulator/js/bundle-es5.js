@@ -17,7 +17,7 @@ var Display = (function () {
         this.canvasContext = this.canvasElement.getContext("2d");
         gameDiv.appendChild(this.canvasElement);
         this.sprites = new Sprites();
-        this.setScale(22);
+        this.setScale(18);
         this.entityTransportBelt = new DisplayEntityTransportBelt();
         this.entitySplitter = new DisplayEntitySplitter();
         this.map = map;
@@ -31,7 +31,6 @@ var Display = (function () {
         if (scaleLevel !== this.scaleLevel) {
             this.scaleLevel = scaleLevel;
             this.scale = this.zoomLevels[scaleLevel];
-            this.draw(performance.now());
         }
     };
     Display.prototype.calc = function () {
@@ -67,34 +66,100 @@ var Display = (function () {
             c.imageSmoothingEnabled = true;
         var belt = this.entityTransportBelt.draw;
         var splitter = this.entitySplitter.draw;
-        var lines = this.map.entityLines;
-        for (var y = 0; y < lines.length; y++) {
-            var line = lines[y];
-            if (!line)
-                continue;
-            for (var x = line.firstX; x <= line.lastX; x++) {
-                var entity = line[x];
-                if (!entity)
-                    continue;
-                switch (entity.e) {
-                    case EntityType.transportBelt:
-                        {
-                            switch (entity.d) {
-                                case 1:
-                                    {
-                                        if (!entity.ln)
-                                            belt(x - 1, y, 14);
-                                        belt(x, y, 0);
-                                        if (!entity.rn)
-                                            belt(x + 1, y, 19);
+        this.map.callEntities(0, 0, 100, 100, function (x, y, e) {
+            switch (e.t) {
+                case EntityType.transportBelt:
+                    {
+                        switch (e.d) {
+                            case Direction.top:
+                                {
+                                    if (e.fromBottom() || e.fromLeft() === e.fromRight()) {
+                                        belt(x, y, BeltType.bottomToTop);
                                     }
-                                    break;
-                            }
+                                    else {
+                                        if (e.fromLeft())
+                                            belt(x, y, BeltType.leftToTop);
+                                        if (e.fromRight())
+                                            belt(x, y, BeltType.rightToTop);
+                                    }
+                                }
+                                break;
+                            case Direction.right:
+                                {
+                                    if (e.fromLeft() || e.fromTop() === e.fromBottom()) {
+                                        belt(x, y, BeltType.leftToRight);
+                                    }
+                                    else {
+                                        if (e.fromTop())
+                                            belt(x, y, BeltType.topToRight);
+                                        if (e.fromBottom())
+                                            belt(x, y, BeltType.bottomToRight);
+                                    }
+                                }
+                                break;
+                            case Direction.bottom:
+                                {
+                                    if (e.fromTop() || e.fromLeft() === e.fromRight()) {
+                                        belt(x, y, BeltType.topToBottom);
+                                    }
+                                    else {
+                                        if (e.fromLeft())
+                                            belt(x, y, BeltType.leftToBottom);
+                                        if (e.fromRight())
+                                            belt(x, y, BeltType.rightToBottom);
+                                    }
+                                }
+                                break;
+                            case Direction.left:
+                                {
+                                    if (e.fromRight() || e.fromTop() === e.fromBottom()) {
+                                        belt(x, y, BeltType.rightToLeft);
+                                    }
+                                    else {
+                                        if (e.fromTop())
+                                            belt(x, y, BeltType.topToLeft);
+                                        if (e.fromBottom())
+                                            belt(x, y, BeltType.bottomToLeft);
+                                    }
+                                }
+                                break;
                         }
-                        break;
-                }
+                    }
+                    break;
             }
-        }
+        });
+        this.map.callEntities(0, 0, 100, 100, function (x, y, e) {
+            switch (e.t) {
+                case EntityType.transportBelt:
+                    {
+                        switch (e.d) {
+                            case Direction.right:
+                                {
+                                }
+                                break;
+                        }
+                    }
+                    break;
+            }
+        });
+        this.map.callEntities(0, 0, 100, 100, function (x, y, e) {
+            switch (e.t) {
+                case EntityType.transportBelt:
+                    {
+                        switch (e.d) {
+                            case Direction.right:
+                                {
+                                }
+                                break;
+                            case Direction.bottom:
+                                {
+                                }
+                                break;
+                        }
+                    }
+                    break;
+            }
+        });
         var helpLines = function (x, y, width, height) {
             c.beginPath();
             c.strokeStyle = "#0f0";
@@ -154,6 +219,29 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var BeltType;
+(function (BeltType) {
+    BeltType[BeltType["leftToRight"] = 0] = "leftToRight";
+    BeltType[BeltType["rightToLeft"] = 1] = "rightToLeft";
+    BeltType[BeltType["bottomToTop"] = 2] = "bottomToTop";
+    BeltType[BeltType["topToBottom"] = 3] = "topToBottom";
+    BeltType[BeltType["rightToTop"] = 4] = "rightToTop";
+    BeltType[BeltType["topToRight"] = 5] = "topToRight";
+    BeltType[BeltType["leftToTop"] = 6] = "leftToTop";
+    BeltType[BeltType["topToLeft"] = 7] = "topToLeft";
+    BeltType[BeltType["bottomToRight"] = 8] = "bottomToRight";
+    BeltType[BeltType["rightToBottom"] = 9] = "rightToBottom";
+    BeltType[BeltType["bottomToLeft"] = 10] = "bottomToLeft";
+    BeltType[BeltType["leftToBottom"] = 11] = "leftToBottom";
+    BeltType[BeltType["voidToTop"] = 12] = "voidToTop";
+    BeltType[BeltType["topToVoid"] = 13] = "topToVoid";
+    BeltType[BeltType["voidToRight"] = 14] = "voidToRight";
+    BeltType[BeltType["rightToVoid"] = 15] = "rightToVoid";
+    BeltType[BeltType["voidToBottom"] = 16] = "voidToBottom";
+    BeltType[BeltType["bottomToVoid"] = 17] = "bottomToVoid";
+    BeltType[BeltType["voidToLeft"] = 18] = "voidToLeft";
+    BeltType[BeltType["leftToVoid"] = 19] = "leftToVoid";
+})(BeltType || (BeltType = {}));
 var DisplayEntity = (function () {
     function DisplayEntity() {
         this.draw = this.draw.bind(this);
@@ -394,7 +482,11 @@ var Game = (function () {
         this.map = new Map();
         this.display = new Display(gameDiv, canvasWidth, canvasHeight, this.map);
         var m = this.map;
-        m.addEntity(3, 3, EntityType.transportBelt, EntityDirection.right);
+        for (var y = 2; y < 12; y++) {
+            for (var x = 2; x < 22; x++) {
+                m.add(x, y, EntityType.transportBelt, Math.random() * 4 >> 0);
+            }
+        }
     }
     Game.prototype.uiUpdate = function () {
         if (keys[107]) {
@@ -542,13 +634,30 @@ var EntityType;
     EntityType[EntityType["splitterLeft"] = 1] = "splitterLeft";
     EntityType[EntityType["splitterRight"] = 2] = "splitterRight";
 })(EntityType || (EntityType = {}));
-var EntityDirection;
-(function (EntityDirection) {
-    EntityDirection[EntityDirection["top"] = 0] = "top";
-    EntityDirection[EntityDirection["right"] = 1] = "right";
-    EntityDirection[EntityDirection["bottom"] = 2] = "bottom";
-    EntityDirection[EntityDirection["left"] = 3] = "left";
-})(EntityDirection || (EntityDirection = {}));
+var Direction;
+(function (Direction) {
+    Direction[Direction["top"] = 0] = "top";
+    Direction[Direction["right"] = 1] = "right";
+    Direction[Direction["bottom"] = 2] = "bottom";
+    Direction[Direction["left"] = 3] = "left";
+})(Direction || (Direction = {}));
+var MapEntity = (function () {
+    function MapEntity(x, y, t, d) {
+        this.x = x;
+        this.y = y;
+        this.t = t;
+        this.d = d;
+    }
+    MapEntity.prototype.toTop = function () { return this.d === Direction.top; };
+    MapEntity.prototype.toRight = function () { return this.d === Direction.right; };
+    MapEntity.prototype.toBottom = function () { return this.d === Direction.bottom; };
+    MapEntity.prototype.toLeft = function () { return this.d === Direction.left; };
+    MapEntity.prototype.fromTop = function () { return this.tn !== undefined && this.tn.toBottom(); };
+    MapEntity.prototype.fromRight = function () { return this.rn !== undefined && this.rn.toLeft(); };
+    MapEntity.prototype.fromBottom = function () { return this.bn !== undefined && this.bn.toTop(); };
+    MapEntity.prototype.fromLeft = function () { return this.ln !== undefined && this.ln.toRight(); };
+    return MapEntity;
+}());
 var Map = (function () {
     function Map() {
         this.entityLines = [];
@@ -572,7 +681,11 @@ var Map = (function () {
                 line.firstX++;
             while (!line[line.lastX])
                 line.lastX--;
+            while (line.length > 0 && !line[line.length - 1])
+                line.length--;
         }
+        while (this.entityLines.length > 0 && !this.entityLines[this.entityLines.length - 1])
+            this.entityLines.length--;
     };
     Map.prototype.removeEntity = function (x, y) {
         var line = this.entityLines[y];
@@ -604,8 +717,8 @@ var Map = (function () {
         this.updatFirstLast(x, y);
         return true;
     };
-    Map.prototype.addEntity = function (x, y, e, d) {
-        var newEntity = { x: x, y: y, e: e, d: d };
+    Map.prototype.add = function (x, y, e, d) {
+        var newEntity = new MapEntity(x, y, e, d);
         this.removeEntity(x, y);
         var lineT = this.entityLines[y - 1];
         var lineB = this.entityLines[y + 1];
@@ -639,6 +752,22 @@ var Map = (function () {
         if (!line)
             return undefined;
         return line[x];
+    };
+    Map.prototype.callEntities = function (firstX, firstY, lastX, lastY, call) {
+        var lines = this.entityLines;
+        if (lastY >= lines.length)
+            lastY = lines.length - 1;
+        for (var y = firstY; y <= lastY; y++) {
+            var line = lines[y];
+            if (!line)
+                continue;
+            var lx = lastX <= line.lastX ? lastX : line.lastX;
+            for (var x = firstX >= line.firstX ? firstX : line.firstX; x <= lx; x++) {
+                var e = line[x];
+                if (e)
+                    call(x, y, e);
+            }
+        }
     };
     return Map;
 }());

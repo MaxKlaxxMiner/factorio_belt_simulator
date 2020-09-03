@@ -7,7 +7,7 @@ enum EntityType
   splitterRight = 2
 }
 
-enum EntityDirection
+enum Direction
 {
   top = 0,
   right = 1,
@@ -15,16 +15,24 @@ enum EntityDirection
   left = 3
 }
 
-interface MapEntity
+class MapEntity
 {
   /** X-Position */
   x: number;
   /** Y-Position */
   y: number;
   /** Entity-Type */
-  e: EntityType;
+  t: EntityType;
   /** Direction (0 = top, 1 = right, 2 = bottom, 3 = left) */
-  d: EntityDirection;
+  d: Direction;
+
+  constructor(x: number, y: number, t: EntityType, d: Direction)
+  {
+    this.x = x;
+    this.y = y;
+    this.t = t;
+    this.d = d;
+  }
 
   /** Top-Neighbor (if exists) */
   tn?: MapEntity;
@@ -34,6 +42,15 @@ interface MapEntity
   bn?: MapEntity;
   /** Left-Neighbor (if exists) */
   ln?: MapEntity;
+
+  toTop(): boolean { return this.d === Direction.top; }
+  toRight(): boolean { return this.d === Direction.right; }
+  toBottom(): boolean { return this.d === Direction.bottom; }
+  toLeft(): boolean { return this.d === Direction.left; }
+  fromTop(): boolean { return this.tn !== undefined && this.tn.toBottom(); }
+  fromRight(): boolean { return this.rn !== undefined && this.rn.toLeft(); }
+  fromBottom(): boolean { return this.bn !== undefined && this.bn.toTop(); }
+  fromLeft(): boolean { return this.ln !== undefined && this.ln.toRight(); }
 }
 
 interface MapEntityLine extends Array<MapEntity>
@@ -69,7 +86,9 @@ class Map
     {
       while (!line[line.firstX]) line.firstX++;
       while (!line[line.lastX]) line.lastX--;
+      while (line.length > 0 && !line[line.length - 1]) line.length--;
     }
+    while (this.entityLines.length > 0 && !this.entityLines[this.entityLines.length - 1]) this.entityLines.length--;
   }
 
   /** remove an entity 
@@ -99,9 +118,9 @@ class Map
    * @param e Entity-Type
    * @param d Direction
    */
-  addEntity(x: number, y: number, e: EntityType, d: EntityDirection)
+  add(x: number, y: number, e: EntityType, d: Direction)
   {
-    const newEntity: MapEntity = { x: x, y: y, e: e, d: d };
+    const newEntity = new MapEntity(x, y, e, d);
     this.removeEntity(x, y); // remove old entity (if exsist)
     const lineT = this.entityLines[y - 1];
     const lineB = this.entityLines[y + 1];
@@ -129,5 +148,22 @@ class Map
     const line = this.entityLines[y];
     if (!line) return undefined;
     return line[x];
+  }
+
+  callEntities(firstX: number, firstY: number, lastX: number, lastY: number, call: (x: number, y: number, e: MapEntity) => void): void
+  {
+    const lines = this.entityLines;
+    if (lastY >= lines.length) lastY = lines.length - 1;
+    for (let y = firstY; y <= lastY; y++)
+    {
+      const line = lines[y];
+      if (!line) continue;
+      const lx = lastX <= line.lastX ? lastX : line.lastX;
+      for (let x = firstX >= line.firstX ? firstX : line.firstX; x <= lx; x++)
+      {
+        const e = line[x];
+        if (e) call(x, y, e);
+      }
+    }
   }
 }

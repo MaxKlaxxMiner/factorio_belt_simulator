@@ -1,5 +1,29 @@
 ﻿/* tslint:disable:one-line max-line-length interface-name comment-format no-bitwise */
 
+enum BeltType
+{
+  leftToRight = 0,
+  rightToLeft = 1,
+  bottomToTop = 2,
+  topToBottom = 3,
+  rightToTop = 4,
+  topToRight = 5,
+  leftToTop = 6,
+  topToLeft = 7,
+  bottomToRight = 8,
+  rightToBottom = 9,
+  bottomToLeft = 10,
+  leftToBottom = 11,
+  voidToTop = 12,
+  topToVoid = 13,
+  voidToRight = 14,
+  rightToVoid = 15,
+  voidToBottom = 16,
+  bottomToVoid = 17,
+  voidToLeft = 18,
+  leftToVoid = 19
+}
+
 class DisplayEntity
 {
   ctx: CanvasRenderingContext2D;
@@ -52,7 +76,7 @@ class DisplayEntityTransportBelt extends DisplayEntity
     this.animate &= 15;
   }
 
-  draw(x: number, y: number, type: number)
+  draw(x: number, y: number, type: BeltType)
   {
     this.ctx.drawImage(this.sprite, this.animate * this.spriteW, type * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
   }

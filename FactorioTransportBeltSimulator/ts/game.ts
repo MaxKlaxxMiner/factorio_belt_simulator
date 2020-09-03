@@ -11,7 +11,19 @@ class Game
     this.display = new Display(gameDiv, canvasWidth, canvasHeight, this.map);
 
     const m = this.map;
-    m.addEntity(3, 3, EntityType.transportBelt, EntityDirection.right);
+
+    for (let y = 2; y < 12; y++)
+    {
+      for (let x = 2; x < 22; x++)
+      {
+        m.add(x, y, EntityType.transportBelt, Math.random() * 4 >> 0);
+        //m.add(x, y, EntityType.transportBelt, 0);
+      }
+    }
+
+    //m.add(3, 2, EntityType.transportBelt, Direction.bottom);
+    //m.add(2, 3, EntityType.transportBelt, Direction.right);
+    //m.add(3, 3, EntityType.transportBelt, Direction.right);
   }
 
   lastWheel = 0;
