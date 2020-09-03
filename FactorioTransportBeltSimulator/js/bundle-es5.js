@@ -1,5 +1,5 @@
 var Display = (function () {
-    function Display(gameDiv, canvasWidth, canvasHeight) {
+    function Display(gameDiv, canvasWidth, canvasHeight, map) {
         this.title = document.title;
         this.countFrame = 0;
         this.countCalc = 0;
@@ -20,6 +20,7 @@ var Display = (function () {
         this.setScale(22);
         this.entityTransportBelt = new DisplayEntityTransportBelt();
         this.entitySplitter = new DisplayEntitySplitter();
+        this.map = map;
     }
     Display.prototype.setScale = function (scaleLevel) {
         scaleLevel = Math.floor(scaleLevel);
@@ -66,30 +67,34 @@ var Display = (function () {
             c.imageSmoothingEnabled = true;
         var belt = this.entityTransportBelt.draw;
         var splitter = this.entitySplitter.draw;
-        belt(2, 1, 8);
-        belt(3, 1, 0);
-        belt(5, 1, 0);
-        belt(6, 1, 11);
-        belt(1, 2, 17);
-        belt(2, 2, 2);
-        belt(3, 2, 14);
-        belt(5, 2, 19);
-        belt(6, 2, 3);
-        belt(7, 2, 16);
-        splitter(4, 1, 3, this.animate & 31);
-        splitter(1, 3, 0);
-        splitter(6, 3, 1, this.animate * 0.2 & 31);
-        splitter(4, 4, 2, this.animate * 2 & 31);
-        belt(1, 4, 12);
-        belt(2, 4, 2);
-        belt(3, 4, 15);
-        belt(5, 4, 18);
-        belt(6, 4, 3);
-        belt(7, 4, 13);
-        belt(2, 5, 4);
-        belt(3, 5, 1);
-        belt(5, 5, 1);
-        belt(6, 5, 7);
+        var lines = this.map.entityLines;
+        for (var y = 0; y < lines.length; y++) {
+            var line = lines[y];
+            if (!line)
+                continue;
+            for (var x = line.firstX; x <= line.lastX; x++) {
+                var entity = line[x];
+                if (!entity)
+                    continue;
+                switch (entity.e) {
+                    case EntityType.transportBelt:
+                        {
+                            switch (entity.d) {
+                                case 1:
+                                    {
+                                        if (!entity.ln)
+                                            belt(x - 1, y, 14);
+                                        belt(x, y, 0);
+                                        if (!entity.rn)
+                                            belt(x + 1, y, 19);
+                                    }
+                                    break;
+                            }
+                        }
+                        break;
+                }
+            }
+        }
         var helpLines = function (x, y, width, height) {
             c.beginPath();
             c.strokeStyle = "#0f0";
@@ -386,7 +391,10 @@ var Game = (function () {
     function Game(gameDiv, canvasWidth, canvasHeight) {
         this.lastWheel = 0;
         this.calcTime = 0;
-        this.display = new Display(gameDiv, canvasWidth, canvasHeight);
+        this.map = new Map();
+        this.display = new Display(gameDiv, canvasWidth, canvasHeight, this.map);
+        var m = this.map;
+        m.addEntity(3, 3, EntityType.transportBelt, EntityDirection.right);
     }
     Game.prototype.uiUpdate = function () {
         if (keys[107]) {
@@ -528,4 +536,110 @@ var Easing = {
     easeOutQuint: function (t) { return 1 + (--t) * t * t * t * t; },
     easeInOutQuint: function (t) { return t < .5 ? 16 * t * t * t * t * t : 1 + 16 * (--t) * t * t * t * t; }
 };
+var EntityType;
+(function (EntityType) {
+    EntityType[EntityType["transportBelt"] = 0] = "transportBelt";
+    EntityType[EntityType["splitterLeft"] = 1] = "splitterLeft";
+    EntityType[EntityType["splitterRight"] = 2] = "splitterRight";
+})(EntityType || (EntityType = {}));
+var EntityDirection;
+(function (EntityDirection) {
+    EntityDirection[EntityDirection["top"] = 0] = "top";
+    EntityDirection[EntityDirection["right"] = 1] = "right";
+    EntityDirection[EntityDirection["bottom"] = 2] = "bottom";
+    EntityDirection[EntityDirection["left"] = 3] = "left";
+})(EntityDirection || (EntityDirection = {}));
+var Map = (function () {
+    function Map() {
+        this.entityLines = [];
+    }
+    Map.prototype.updatFirstLast = function (x, y) {
+        var line = this.entityLines[y];
+        if (!line)
+            return;
+        if (line.firstX === undefined)
+            line.firstX = x;
+        if (line.lastX === undefined)
+            line.lastX = x;
+        if (line[x]) {
+            if (x < line.firstX)
+                line.firstX = x;
+            if (x > line.lastX)
+                line.lastX = x;
+        }
+        else {
+            while (!line[line.firstX])
+                line.firstX++;
+            while (!line[line.lastX])
+                line.lastX--;
+        }
+    };
+    Map.prototype.removeEntity = function (x, y) {
+        var line = this.entityLines[y];
+        if (!line)
+            return false;
+        var entity = line[x];
+        if (!entity)
+            return false;
+        if (entity.ln) {
+            delete line[x - 1].rn;
+            delete entity.ln;
+        }
+        if (entity.rn) {
+            delete line[x + 1].ln;
+            delete entity.rn;
+        }
+        if (entity.tn) {
+            delete this.entityLines[y - 1][x].bn;
+            delete entity.tn;
+        }
+        if (entity.bn) {
+            delete this.entityLines[y + 1][x].tn;
+            delete entity.bn;
+        }
+        delete line[x];
+        line.count--;
+        if (line.count === 0)
+            delete this.entityLines[y];
+        this.updatFirstLast(x, y);
+        return true;
+    };
+    Map.prototype.addEntity = function (x, y, e, d) {
+        var newEntity = { x: x, y: y, e: e, d: d };
+        this.removeEntity(x, y);
+        var lineT = this.entityLines[y - 1];
+        var lineB = this.entityLines[y + 1];
+        var line = this.entityLines[y];
+        if (!line) {
+            this.entityLines[y] = line = [];
+            line.count = 0;
+        }
+        line[x] = newEntity;
+        line.count++;
+        if (line[x - 1]) {
+            newEntity.ln = line[x - 1];
+            line[x - 1].rn = newEntity;
+        }
+        if (line[x + 1]) {
+            newEntity.rn = line[x + 1];
+            line[x + 1].ln = newEntity;
+        }
+        if (lineT && lineT[x]) {
+            newEntity.tn = lineT[x];
+            lineT[x].bn = newEntity;
+        }
+        if (lineB && lineB[x]) {
+            newEntity.bn = lineB[x];
+            lineB[x].tn = newEntity;
+        }
+        this.updatFirstLast(x, y);
+    };
+    Map.prototype.getEntity = function (x, y) {
+        var line = this.entityLines[y];
+        if (!line)
+            return undefined;
+        return line[x];
+    };
+    return Map;
+}());
 //# sourceMappingURL=bundle-es5.js.map

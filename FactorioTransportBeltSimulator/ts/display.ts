@@ -7,11 +7,12 @@ class Display
   canvasContext: CanvasRenderingContext2D;
   title = document.title;
   sprites: Sprites;
+  map: Map;
 
   entityTransportBelt: DisplayEntity;
   entitySplitter: DisplayEntity;
 
-  constructor(gameDiv: HTMLElement, canvasWidth: number, canvasHeight: number)
+  constructor(gameDiv: HTMLElement, canvasWidth: number, canvasHeight: number, map: Map)
   {
     this.gameDiv = gameDiv;
     gameDiv.style.width = canvasWidth + "px";
@@ -30,6 +31,7 @@ class Display
 
     this.entityTransportBelt = new DisplayEntityTransportBelt();
     this.entitySplitter = new DisplayEntitySplitter();
+    this.map = map;
   }
 
   countFrame = 0;
@@ -123,14 +125,39 @@ class Display
     // 18 = void -> left
     // 19 = left -> void
 
-    belt(2, 1, 8); belt(3, 1, 0); belt(5, 1, 0); belt(6, 1, 11);
-    belt(1, 2, 17); belt(2, 2, 2); belt(3, 2, 14); belt(5, 2, 19); belt(6, 2, 3); belt(7, 2, 16);
-    splitter(4, 1, 3, this.animate & 31);
-    splitter(1, 3, 0); splitter(6, 3, 1, this.animate * 0.2 & 31);
-    splitter(4, 4, 2, this.animate * 2 & 31);
-    belt(1, 4, 12); belt(2, 4, 2); belt(3, 4, 15); belt(5, 4, 18); belt(6, 4, 3); belt(7, 4, 13);
-    belt(2, 5, 4); belt(3, 5, 1); belt(5, 5, 1); belt(6, 5, 7);
+    //belt(2, 1, 8); belt(3, 1, 0); belt(5, 1, 0); belt(6, 1, 11);
+    //belt(1, 2, 17); belt(2, 2, 2); belt(3, 2, 14); belt(5, 2, 19); belt(6, 2, 3); belt(7, 2, 16);
+    //splitter(4, 1, 3, this.animate & 31);
+    //splitter(1, 3, 0); splitter(6, 3, 1, this.animate * 0.2 & 31);
+    //splitter(4, 4, 2, this.animate * 2 & 31);
+    //belt(1, 4, 12); belt(2, 4, 2); belt(3, 4, 15); belt(5, 4, 18); belt(6, 4, 3); belt(7, 4, 13);
+    //belt(2, 5, 4); belt(3, 5, 1); belt(5, 5, 1); belt(6, 5, 7);
 
+    //todo: optimize viewport
+    const lines = this.map.entityLines;
+    for (let y = 0; y < lines.length; y++)
+    {
+      const line = lines[y];
+      if (!line) continue;
+      for (let x = line.firstX; x <= line.lastX; x++)
+      {
+        const entity = line[x];
+        if (!entity) continue;
+        switch (entity.e)
+        {
+          case EntityType.transportBelt: {
+            switch (entity.d) // direction
+            {
+              case 1: { // right
+                if (!entity.ln) belt(x - 1, y, 14);
+                belt(x, y, 0);
+                if (!entity.rn) belt(x + 1, y, 19);
+              } break;
+            }
+          } break;
+        }
+      }
+    }
 
     // --- Helper lines ---
     const helpLines = (x: number, y: number, width: number, height: number) =>

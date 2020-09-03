@@ -2,11 +2,16 @@
 
 class Game
 {
+  map: Map;
   display: Display;
 
   constructor(gameDiv: HTMLElement, canvasWidth: number, canvasHeight: number)
   {
-    this.display = new Display(gameDiv, canvasWidth, canvasHeight);
+    this.map = new Map();
+    this.display = new Display(gameDiv, canvasWidth, canvasHeight, this.map);
+
+    const m = this.map;
+    m.addEntity(3, 3, EntityType.transportBelt, EntityDirection.right);
   }
 
   lastWheel = 0;
