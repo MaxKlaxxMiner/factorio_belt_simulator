@@ -96,6 +96,11 @@ class Game
 
     window.onmousewheel = (m: MouseWheelEvent) =>
     {
+      if ((<any>m).wheelDelta !== undefined) // IE workaround
+      {
+        if ((<any>m).wheelDelta < 0) mouseWheel++; else mouseWheel--;
+        return;
+      }
       if (m.deltaY > 0) mouseWheel++; else mouseWheel--;
     };
 

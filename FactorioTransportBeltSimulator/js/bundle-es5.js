@@ -549,6 +549,13 @@ var Game = (function () {
         };
         document.addEventListener("contextmenu", function (event) { return event.preventDefault(); });
         window.onmousewheel = function (m) {
+            if (m.wheelDelta !== undefined) {
+                if (m.wheelDelta < 0)
+                    mouseWheel++;
+                else
+                    mouseWheel--;
+                return;
+            }
             if (m.deltaY > 0)
                 mouseWheel++;
             else

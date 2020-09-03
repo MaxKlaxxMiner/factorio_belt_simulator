@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title>FTBS v0.019</title>
+  <title>FTBS v0.020</title>
   <script type="text/javascript">
     function checkEs6()
     {
@@ -44,7 +44,17 @@
       //}
 
       // --- debugging ---
-      loadScript("/js/bundle-es5.js?" + rnd, function () { Game.run(); });
+      if (checkEs6())
+      {
+        loadScript("/js/bundle-es5.js?" + rnd, function () { Game.run(); });
+      }
+      else
+      {
+        loadScript("/js/fallback.js?" + rnd, function ()
+        {
+          loadScript("/js/bundle-es5.js?" + rnd, function () { Game.run(); });
+        });
+      }
     };
   </script>
   <style>
