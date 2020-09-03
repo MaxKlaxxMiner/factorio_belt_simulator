@@ -17,7 +17,7 @@ class Game
       for (let x = 2; x < 22; x++)
       {
         m.add(x, y, EntityType.transportBelt, Math.random() * 4 >> 0);
-        //m.add(x, y, EntityType.transportBelt, 0);
+        //m.add(x, y, EntityType.transportBelt, y & 3);
       }
     }
 

@@ -47,10 +47,21 @@ class MapEntity
   toRight(): boolean { return this.d === Direction.right; }
   toBottom(): boolean { return this.d === Direction.bottom; }
   toLeft(): boolean { return this.d === Direction.left; }
-  fromTop(): boolean { return this.tn !== undefined && this.tn.toBottom(); }
-  fromRight(): boolean { return this.rn !== undefined && this.rn.toLeft(); }
-  fromBottom(): boolean { return this.bn !== undefined && this.bn.toTop(); }
-  fromLeft(): boolean { return this.ln !== undefined && this.ln.toRight(); }
+  fromTop(backCheck?: boolean): boolean { return this.tn !== undefined && (this.tn.toBottom() || backCheck === true && this.tn.toTop() && !this.tn.isCurve()); }
+  fromRight(backCheck?: boolean): boolean { return this.rn !== undefined && (this.rn.toLeft() || backCheck === true && this.rn.toRight() && !this.rn.isCurve()); }
+  fromBottom(backCheck?: boolean): boolean { return this.bn !== undefined && (this.bn.toTop() || backCheck === true && this.bn.toBottom() && !this.bn.isCurve()); }
+  fromLeft(backCheck?: boolean): boolean { return this.ln !== undefined && (this.ln.toRight() || backCheck === true && this.ln.toLeft() && !this.ln.isCurve()); }
+  isCurve(): boolean
+  {
+    switch (this.d)
+    {
+      case Direction.top: return !this.fromBottom() && this.fromLeft() !== this.fromRight();
+      case Direction.right: return !this.fromLeft() && this.fromTop() !== this.fromBottom();
+      case Direction.bottom: return !this.fromTop() && this.fromLeft() !== this.fromRight();
+      case Direction.left: return !this.fromRight() && this.fromTop() !== this.fromBottom();
+      default: return false;
+    }
+  }
 }
 
 interface MapEntityLine extends Array<MapEntity>

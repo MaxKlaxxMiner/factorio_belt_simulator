@@ -66,6 +66,7 @@ var Display = (function () {
             c.imageSmoothingEnabled = true;
         var belt = this.entityTransportBelt.draw;
         var splitter = this.entitySplitter.draw;
+        var additives = [];
         this.map.callEntities(0, 0, 100, 100, function (x, y, e) {
             switch (e.t) {
                 case EntityType.transportBelt:
@@ -73,54 +74,70 @@ var Display = (function () {
                         switch (e.d) {
                             case Direction.top:
                                 {
-                                    if (e.fromBottom() || e.fromLeft() === e.fromRight()) {
-                                        belt(x, y, BeltType.bottomToTop);
-                                    }
-                                    else {
+                                    if (e.isCurve()) {
                                         if (e.fromLeft())
                                             belt(x, y, BeltType.leftToTop);
                                         if (e.fromRight())
                                             belt(x, y, BeltType.rightToTop);
                                     }
+                                    else {
+                                        belt(x, y, BeltType.bottomToTop);
+                                        if (!e.fromBottom(true))
+                                            additives.push({ x: x, y: y + 1, t: BeltType.voidToTop });
+                                    }
+                                    if (e.tn === undefined || !e.tn.isCurve() && !e.fromTop(true))
+                                        additives.push({ x: x, y: y - 1, t: BeltType.bottomToVoid });
                                 }
                                 break;
                             case Direction.right:
                                 {
-                                    if (e.fromLeft() || e.fromTop() === e.fromBottom()) {
-                                        belt(x, y, BeltType.leftToRight);
-                                    }
-                                    else {
+                                    if (e.isCurve()) {
                                         if (e.fromTop())
                                             belt(x, y, BeltType.topToRight);
                                         if (e.fromBottom())
                                             belt(x, y, BeltType.bottomToRight);
                                     }
+                                    else {
+                                        belt(x, y, BeltType.leftToRight);
+                                        if (!e.fromLeft(true))
+                                            additives.push({ x: x - 1, y: y, t: BeltType.voidToRight });
+                                    }
+                                    if (e.rn === undefined || !e.rn.isCurve() && !e.fromRight(true))
+                                        additives.push({ x: x + 1, y: y, t: BeltType.leftToVoid });
                                 }
                                 break;
                             case Direction.bottom:
                                 {
-                                    if (e.fromTop() || e.fromLeft() === e.fromRight()) {
-                                        belt(x, y, BeltType.topToBottom);
-                                    }
-                                    else {
+                                    if (e.isCurve()) {
                                         if (e.fromLeft())
                                             belt(x, y, BeltType.leftToBottom);
                                         if (e.fromRight())
                                             belt(x, y, BeltType.rightToBottom);
                                     }
+                                    else {
+                                        belt(x, y, BeltType.topToBottom);
+                                        if (!e.fromTop(true))
+                                            additives.push({ x: x, y: y - 1, t: BeltType.voidToBottom });
+                                    }
+                                    if (e.bn === undefined || !e.bn.isCurve() && !e.fromBottom(true))
+                                        additives.push({ x: x, y: y + 1, t: BeltType.topToVoid });
                                 }
                                 break;
                             case Direction.left:
                                 {
-                                    if (e.fromRight() || e.fromTop() === e.fromBottom()) {
-                                        belt(x, y, BeltType.rightToLeft);
-                                    }
-                                    else {
+                                    if (e.isCurve()) {
                                         if (e.fromTop())
                                             belt(x, y, BeltType.topToLeft);
                                         if (e.fromBottom())
                                             belt(x, y, BeltType.bottomToLeft);
                                     }
+                                    else {
+                                        belt(x, y, BeltType.rightToLeft);
+                                        if (!e.fromRight(true))
+                                            additives.push({ x: x + 1, y: y, t: BeltType.voidToLeft });
+                                    }
+                                    if (e.ln === undefined || !e.ln.isCurve() && !e.fromLeft(true))
+                                        additives.push({ x: x - 1, y: y, t: BeltType.rightToVoid });
                                 }
                                 break;
                         }
@@ -128,9 +145,12 @@ var Display = (function () {
                     break;
             }
         });
+        additives.forEach(function (add) {
+            belt(add.x, add.y, add.t);
+        });
         this.map.callEntities(0, 0, 100, 100, function (x, y, e) {
             switch (e.t) {
-                case EntityType.transportBelt:
+                case EntityType.splitterLeft:
                     {
                         switch (e.d) {
                             case Direction.right:
@@ -140,18 +160,10 @@ var Display = (function () {
                         }
                     }
                     break;
-            }
-        });
-        this.map.callEntities(0, 0, 100, 100, function (x, y, e) {
-            switch (e.t) {
-                case EntityType.transportBelt:
+                case EntityType.splitterRight:
                     {
                         switch (e.d) {
                             case Direction.right:
-                                {
-                                }
-                                break;
-                            case Direction.bottom:
                                 {
                                 }
                                 break;
@@ -652,10 +664,19 @@ var MapEntity = (function () {
     MapEntity.prototype.toRight = function () { return this.d === Direction.right; };
     MapEntity.prototype.toBottom = function () { return this.d === Direction.bottom; };
     MapEntity.prototype.toLeft = function () { return this.d === Direction.left; };
-    MapEntity.prototype.fromTop = function () { return this.tn !== undefined && this.tn.toBottom(); };
-    MapEntity.prototype.fromRight = function () { return this.rn !== undefined && this.rn.toLeft(); };
-    MapEntity.prototype.fromBottom = function () { return this.bn !== undefined && this.bn.toTop(); };
-    MapEntity.prototype.fromLeft = function () { return this.ln !== undefined && this.ln.toRight(); };
+    MapEntity.prototype.fromTop = function (backCheck) { return this.tn !== undefined && (this.tn.toBottom() || backCheck === true && this.tn.toTop() && !this.tn.isCurve()); };
+    MapEntity.prototype.fromRight = function (backCheck) { return this.rn !== undefined && (this.rn.toLeft() || backCheck === true && this.rn.toRight() && !this.rn.isCurve()); };
+    MapEntity.prototype.fromBottom = function (backCheck) { return this.bn !== undefined && (this.bn.toTop() || backCheck === true && this.bn.toBottom() && !this.bn.isCurve()); };
+    MapEntity.prototype.fromLeft = function (backCheck) { return this.ln !== undefined && (this.ln.toRight() || backCheck === true && this.ln.toLeft() && !this.ln.isCurve()); };
+    MapEntity.prototype.isCurve = function () {
+        switch (this.d) {
+            case Direction.top: return !this.fromBottom() && this.fromLeft() !== this.fromRight();
+            case Direction.right: return !this.fromLeft() && this.fromTop() !== this.fromBottom();
+            case Direction.bottom: return !this.fromTop() && this.fromLeft() !== this.fromRight();
+            case Direction.left: return !this.fromRight() && this.fromTop() !== this.fromBottom();
+            default: return false;
+        }
+    };
     return MapEntity;
 }());
 var Map = (function () {

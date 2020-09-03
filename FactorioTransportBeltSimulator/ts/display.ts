@@ -105,6 +105,7 @@ class Display
     //todo: optimize viewport
 
     // --- pipeline step 2: draw transport belts ---
+    const additives: { x: number, y: number, t: BeltType }[] = [];
     this.map.callEntities(0, 0, 100, 100, (x, y, e) =>
     {
       switch (e.t)
@@ -113,51 +114,59 @@ class Display
           switch (e.d) // direction
           {
             case Direction.top: {
-              if (e.fromBottom() || e.fromLeft() === e.fromRight())
-              {
-                belt(x, y, BeltType.bottomToTop);
-              }
-              else // curve?
+              if (e.isCurve())
               {
                 if (e.fromLeft()) belt(x, y, BeltType.leftToTop);
                 if (e.fromRight()) belt(x, y, BeltType.rightToTop);
               }
+              else
+              {
+                belt(x, y, BeltType.bottomToTop);
+                if (!e.fromBottom(true)) additives.push({ x: x, y: y + 1, t: BeltType.voidToTop });
+              }
+              if (e.tn === undefined || !e.tn.isCurve() && !e.fromTop(true)) additives.push({ x: x, y: y - 1, t: BeltType.bottomToVoid });
             } break;
 
             case Direction.right: {
-              if (e.fromLeft() || e.fromTop() === e.fromBottom())
-              {
-                belt(x, y, BeltType.leftToRight);
-              }
-              else // curve?
+              if (e.isCurve())
               {
                 if (e.fromTop()) belt(x, y, BeltType.topToRight);
                 if (e.fromBottom()) belt(x, y, BeltType.bottomToRight);
               }
+              else
+              {
+                belt(x, y, BeltType.leftToRight);
+                if (!e.fromLeft(true)) additives.push({ x: x - 1, y: y, t: BeltType.voidToRight });
+              }
+              if (e.rn === undefined || !e.rn.isCurve() && !e.fromRight(true)) additives.push({ x: x + 1, y: y, t: BeltType.leftToVoid });
             } break;
 
             case Direction.bottom: {
-              if (e.fromTop() || e.fromLeft() === e.fromRight())
-              {
-                belt(x, y, BeltType.topToBottom);
-              }
-              else // curve?
+              if (e.isCurve())
               {
                 if (e.fromLeft()) belt(x, y, BeltType.leftToBottom);
                 if (e.fromRight()) belt(x, y, BeltType.rightToBottom);
               }
+              else
+              {
+                belt(x, y, BeltType.topToBottom);
+                if (!e.fromTop(true)) additives.push({ x: x, y: y - 1, t: BeltType.voidToBottom });
+              }
+              if (e.bn === undefined || !e.bn.isCurve() && !e.fromBottom(true)) additives.push({ x: x, y: y + 1, t: BeltType.topToVoid });
             } break;
 
             case Direction.left: {
-              if (e.fromRight() || e.fromTop() === e.fromBottom())
-              {
-                belt(x, y, BeltType.rightToLeft);
-              }
-              else // curve?
+              if (e.isCurve())
               {
                 if (e.fromTop()) belt(x, y, BeltType.topToLeft);
                 if (e.fromBottom()) belt(x, y, BeltType.bottomToLeft);
               }
+              else
+              {
+                belt(x, y, BeltType.rightToLeft);
+                if (!e.fromRight(true)) additives.push({ x: x + 1, y: y, t: BeltType.voidToLeft });
+              }
+              if (e.ln === undefined || !e.ln.isCurve() && !e.fromLeft(true)) additives.push({ x: x - 1, y: y, t: BeltType.rightToVoid });
             } break;
           }
         } break;
@@ -165,18 +174,9 @@ class Display
     });
 
     // --- pipeline step 3: draw belt additives ---
-    this.map.callEntities(0, 0, 100, 100, (x, y, e) =>
+    additives.forEach(add =>
     {
-      switch (e.t)
-      {
-        case EntityType.transportBelt: {
-          switch (e.d) // direction
-          {
-            case Direction.right: {
-            } break;
-          }
-        } break;
-      }
+      belt(add.x, add.y, add.t);
     });
 
     // --- pipeline step 4: draw entities ---
@@ -184,13 +184,18 @@ class Display
     {
       switch (e.t)
       {
-        case EntityType.transportBelt: {
+        case EntityType.splitterLeft: {
           switch (e.d) // direction
           {
             case Direction.right: {
             } break;
-            case Direction.bottom: {
-            } break;
+          }
+        } break;
+        case EntityType.splitterRight: {
+          switch (e.d) // direction
+          {
+          case Direction.right: {
+          } break;
           }
         } break;
       }
