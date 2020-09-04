@@ -74,6 +74,15 @@ interface MapEntityLine extends Array<MapEntity>
   lastX: number;
 }
 
+interface BluePrint
+{
+  blueprint:
+  {
+    icons: Array<{ signal: { type: string, name: string }, index: number }>,
+    entities: Array<{ entity_number: number, name: string, position: { x: number, y: number }, direction?: number }>;
+  };
+}
+
 class Map
 {
   entityLines: MapEntityLine[] = [];
@@ -148,6 +157,43 @@ class Map
     if (lineT && lineT[x]) { newEntity.tn = lineT[x]; lineT[x].bn = newEntity; } // connect top
     if (lineB && lineB[x]) { newEntity.bn = lineB[x]; lineB[x].tn = newEntity; } // connect bottom
     this.updatFirstLast(x, y);
+  }
+
+  /** load a factorio blueprint 
+   * @param startX Start-Position X
+   * @param startY Start-Position Y
+   * @param base64 Blueprint-Code
+   */
+  loadBlueprint(startX: number, startY: number, base64: string): boolean
+  {
+    try
+    {
+      if (base64[0] !== "0") return false;
+      const blueprint = JSON.parse(pako.inflate(atob(base64.substr(1)), { to: "string" }).toString()) as BluePrint;
+      const entities = blueprint.blueprint.entities;
+      let minX = 1000000;
+      let minY = 1000000;
+      entities.forEach(e =>
+      {
+        if (e.position.x < minX) minX = e.position.x;
+        if (e.position.y < minY) minY = e.position.y;
+      });
+      entities.forEach(e =>
+      {
+        const x = (e.position.x - minX + startX) >> 0;
+        const y = (e.position.y - minY + startY) >> 0;
+        const d = e.direction === 2 ? Direction.right : e.direction === 6 ? Direction.left : e.direction === 4 ? Direction.bottom : Direction.top;
+        switch (e.name)
+        {
+          case "transport-belt": this.add(x, y, EntityType.transportBelt, d); break;
+        }
+      });
+      return true;
+    }
+    catch (exc)
+    {
+      return false;
+    }
   }
 
   /** get entity 

@@ -1,5 +1,10 @@
 ﻿# *** copy from game directory ***
 
+rem --- my office ---
+set src=D:\steam\steamapps\common\Factorio
+set dst=C:\Users\Max\Desktop\prog\Spiele\factorio_belt_simulator
+
+rem --- my home ---
 set src=C:\Spiele\Steam\steamapps\common\Factorio
 set dst=C:\Users\MaxKlaxx\Desktop\Prog\Spiele\factorio_belt_simulator
 

@@ -487,6 +487,12 @@ var DisplayEntitySplitter = (function (_super) {
     };
     return DisplayEntitySplitter;
 }(DisplayEntity));
+var keys = {};
+var mouseX = 0;
+var mouseY = 0;
+var mouseButtons = 0;
+var mouseWheel = 0;
+var game;
 var Game = (function () {
     function Game(gameDiv, canvasWidth, canvasHeight) {
         this.lastWheel = 0;
@@ -494,11 +500,11 @@ var Game = (function () {
         this.map = new Map();
         this.display = new Display(gameDiv, canvasWidth, canvasHeight, this.map);
         var m = this.map;
-        for (var y = 2; y < 12; y++) {
-            for (var x = 2; x < 22; x++) {
-                m.add(x, y, EntityType.transportBelt, Math.random() * 4 >> 0);
-            }
-        }
+        var loopBp = "0eNqd092ugyAMAOB36TVbxCFuvMpysujWLCRaDXTLMYZ3H+rNOZlLJpfl5yvQMkLdPLB3lhjMCPbakQdzHsHbO1XNNMZDj2DAMrYggKp2ithV5PvO8a7GhiEIsHTDXzAy/AhAYssWF2kOhgs92hpdXPDJENB3Pm7raMoaqZ1U+0LAAOa0L2KGm3V4XebzIN7gfAOcf4LVCnzYAB+2nFglPIWUUV6xihQrW7d0woXnc/27sV6Ry4QafScfU+Tsvfyxe+dON38+hoCmitZko2cZ4yc6v5T1KFWpTqUuZaYLHcILdU8UnQ==";
+        m.loadBlueprint(1, 1, loopBp);
+        m.loadBlueprint(5, 1, loopBp);
+        m.loadBlueprint(1, 5, loopBp);
+        m.loadBlueprint(5, 5, loopBp);
     }
     Game.prototype.uiUpdate = function () {
         if (keys[107]) {
@@ -548,7 +554,8 @@ var Game = (function () {
             keys[e.keyCode] = false;
         };
         document.addEventListener("contextmenu", function (event) { return event.preventDefault(); });
-        window.onmousewheel = function (m) {
+        function mouseWheelEvent(m) {
+            console.log(m);
             if (m.wheelDelta !== undefined) {
                 if (m.wheelDelta < 0)
                     mouseWheel++;
@@ -556,11 +563,25 @@ var Game = (function () {
                     mouseWheel--;
                 return;
             }
-            if (m.deltaY > 0)
-                mouseWheel++;
-            else
-                mouseWheel--;
-        };
+            if (typeof m.deltaY === "number") {
+                if (m.deltaY > 0)
+                    mouseWheel++;
+                else
+                    mouseWheel--;
+            }
+            else {
+                if (m.detail > 0)
+                    mouseWheel++;
+                else
+                    mouseWheel--;
+            }
+        }
+        if ("onmousewheel" in window) {
+            window.onmousewheel = mouseWheelEvent;
+        }
+        else {
+            document.addEventListener("DOMMouseScroll", mouseWheelEvent, false);
+        }
         var mouseEvent = function (m) {
             mouseX = m.x;
             mouseY = m.y;
@@ -574,12 +595,6 @@ var Game = (function () {
     };
     return Game;
 }());
-var keys = {};
-var mouseX = 0;
-var mouseY = 0;
-var mouseButtons = 0;
-var mouseWheel = 0;
-var game;
 var Sprites = (function () {
     function Sprites() {
         var _this = this;
@@ -774,6 +789,37 @@ var Map = (function () {
             lineB[x].tn = newEntity;
         }
         this.updatFirstLast(x, y);
+    };
+    Map.prototype.loadBlueprint = function (startX, startY, base64) {
+        var _this = this;
+        try {
+            if (base64[0] !== "0")
+                return false;
+            var blueprint = JSON.parse(pako.inflate(atob(base64.substr(1)), { to: "string" }).toString());
+            var entities = blueprint.blueprint.entities;
+            var minX_1 = 1000000;
+            var minY_1 = 1000000;
+            entities.forEach(function (e) {
+                if (e.position.x < minX_1)
+                    minX_1 = e.position.x;
+                if (e.position.y < minY_1)
+                    minY_1 = e.position.y;
+            });
+            entities.forEach(function (e) {
+                var x = (e.position.x - minX_1 + startX) >> 0;
+                var y = (e.position.y - minY_1 + startY) >> 0;
+                var d = e.direction === 2 ? Direction.right : e.direction === 6 ? Direction.left : e.direction === 4 ? Direction.bottom : Direction.top;
+                switch (e.name) {
+                    case "transport-belt":
+                        _this.add(x, y, EntityType.transportBelt, d);
+                        break;
+                }
+            });
+            return true;
+        }
+        catch (exc) {
+            return false;
+        }
     };
     Map.prototype.getEntity = function (x, y) {
         var line = this.entityLines[y];

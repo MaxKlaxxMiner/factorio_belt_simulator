@@ -1,5 +1,13 @@
 ﻿/* tslint:disable:one-line max-line-length interface-name comment-format no-bitwise */
 
+// --- globals ---
+const keys: { [key: number]: boolean } = {};
+let mouseX = 0;
+let mouseY = 0;
+let mouseButtons = 0;
+let mouseWheel = 0;
+let game: Game;
+
 class Game
 {
   map: Map;
@@ -12,14 +20,21 @@ class Game
 
     const m = this.map;
 
-    for (let y = 2; y < 12; y++)
-    {
-      for (let x = 2; x < 22; x++)
-      {
-        m.add(x, y, EntityType.transportBelt, Math.random() * 4 >> 0);
-        //m.add(x, y, EntityType.transportBelt, y & 3);
-      }
-    }
+    const loopBp = "0eNqd092ugyAMAOB36TVbxCFuvMpysujWLCRaDXTLMYZ3H+rNOZlLJpfl5yvQMkLdPLB3lhjMCPbakQdzHsHbO1XNNMZDj2DAMrYggKp2ithV5PvO8a7GhiEIsHTDXzAy/AhAYssWF2kOhgs92hpdXPDJENB3Pm7raMoaqZ1U+0LAAOa0L2KGm3V4XebzIN7gfAOcf4LVCnzYAB+2nFglPIWUUV6xihQrW7d0woXnc/27sV6Ry4QafScfU+Tsvfyxe+dON38+hoCmitZko2cZ4yc6v5T1KFWpTqUuZaYLHcILdU8UnQ==";
+
+    m.loadBlueprint(1, 1, loopBp);
+    m.loadBlueprint(5, 1, loopBp);
+    m.loadBlueprint(1, 5, loopBp);
+    m.loadBlueprint(5, 5, loopBp);
+
+    //for (let y = 2; y < 12; y++)
+    //{
+    //  for (let x = 2; x < 22; x++)
+    //  {
+    //    m.add(x, y, EntityType.transportBelt, Math.random() * 4 >> 0);
+    //    //m.add(x, y, EntityType.transportBelt, y & 3);
+    //  }
+    //}
 
     //m.add(3, 2, EntityType.transportBelt, Direction.bottom);
     //m.add(2, 3, EntityType.transportBelt, Direction.right);
@@ -94,15 +109,32 @@ class Game
     // --- mouse events ---
     document.addEventListener("contextmenu", event => event.preventDefault()); // disable context menu (right mouse click)
 
-    window.onmousewheel = (m: MouseWheelEvent) =>
+    function mouseWheelEvent(m: MouseWheelEvent)
     {
+      console.log(m);
       if ((<any>m).wheelDelta !== undefined) // IE workaround
       {
         if ((<any>m).wheelDelta < 0) mouseWheel++; else mouseWheel--;
         return;
       }
-      if (m.deltaY > 0) mouseWheel++; else mouseWheel--;
-    };
+      if (typeof m.deltaY === "number")
+      {
+        if (m.deltaY > 0) mouseWheel++; else mouseWheel--; // generic
+      }
+      else
+      {
+        if (m.detail > 0) mouseWheel++; else mouseWheel--; // firefox workaround
+      }
+    }
+
+    if ("onmousewheel" in window)
+    {
+      window.onmousewheel = mouseWheelEvent;
+    }
+    else // Firefox fallback
+    {
+      document.addEventListener("DOMMouseScroll", mouseWheelEvent, false);
+    }
 
     const mouseEvent = (m: MouseEvent) =>
     {
@@ -121,10 +153,3 @@ class Game
     const run = () => { requestAnimFrame(run); game.draw(); }; run(); // vsync
   }
 }
-
-const keys: { [key: number]: boolean } = {};
-let mouseX = 0;
-let mouseY = 0;
-let mouseButtons = 0;
-let mouseWheel = 0;
-let game: Game;
