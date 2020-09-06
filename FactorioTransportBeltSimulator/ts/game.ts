@@ -22,10 +22,10 @@ class Game
 
     const loopBp = "0eNqd092ugyAMAOB36TVbxCFuvMpysujWLCRaDXTLMYZ3H+rNOZlLJpfl5yvQMkLdPLB3lhjMCPbakQdzHsHbO1XNNMZDj2DAMrYggKp2ithV5PvO8a7GhiEIsHTDXzAy/AhAYssWF2kOhgs92hpdXPDJENB3Pm7raMoaqZ1U+0LAAOa0L2KGm3V4XebzIN7gfAOcf4LVCnzYAB+2nFglPIWUUV6xihQrW7d0woXnc/27sV6Ry4QafScfU+Tsvfyxe+dON38+hoCmitZko2cZ4yc6v5T1KFWpTqUuZaYLHcILdU8UnQ==";
 
-    m.loadBlueprint(1, 1, loopBp);
-    m.loadBlueprint(5, 1, loopBp);
-    m.loadBlueprint(1, 5, loopBp);
-    m.loadBlueprint(5, 5, loopBp);
+    m.addBlueprint(1, 1, loopBp);
+    m.addBlueprint(5, 1, loopBp);
+    m.addBlueprint(1, 5, loopBp);
+    m.addBlueprint(5, 5, loopBp);
 
     //for (let y = 2; y < 12; y++)
     //{

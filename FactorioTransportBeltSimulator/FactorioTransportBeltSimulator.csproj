@@ -103,6 +103,7 @@
     <TypeScriptCompile Include="ts\displayEntities.ts" />
     <TypeScriptCompile Include="ts\display.ts" />
     <TypeScriptCompile Include="ts\def\pako.d.ts" />
+    <TypeScriptCompile Include="ts\blueprint.ts" />
     <TypeScriptCompile Include="ts\sprites.ts" />
     <TypeScriptCompile Include="ts\map.ts" />
     <TypeScriptCompile Include="ts\tools.ts" />

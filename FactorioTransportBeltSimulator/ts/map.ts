@@ -74,15 +74,6 @@ interface MapEntityLine extends Array<MapEntity>
   lastX: number;
 }
 
-interface BluePrint
-{
-  blueprint:
-  {
-    icons: Array<{ signal: { type: string, name: string }, index: number }>,
-    entities: Array<{ entity_number: number, name: string, position: { x: number, y: number }, direction?: number }>;
-  };
-}
-
 class Map
 {
   entityLines: MapEntityLine[] = [];
@@ -164,36 +155,38 @@ class Map
    * @param startY Start-Position Y
    * @param base64 Blueprint-Code
    */
-  loadBlueprint(startX: number, startY: number, base64: string): boolean
+  addBlueprint(startX: number, startY: number, base64: string): boolean
   {
-    try
+    const r = Blueprint.decodeBlueprint(base64);
+    if (r.length === 0) return false;
+
+    r.forEach(e => { this.add(e.x + startX, e.y + startY, e.t, e.d); });
+
+    return true;
+  }
+
+  /** save a factorio blueprint and return a base64 string
+   * @param label optional Label of the blueprint
+   */
+  getBlueprint(label = "blueprint"): string
+  {
+    const entities: MapEntity[] = [];
+
+    for (let y = 0; y < this.entityLines.length; y++)
     {
-      if (base64[0] !== "0") return false;
-      const blueprint = JSON.parse(pako.inflate(atob(base64.substr(1)), { to: "string" }).toString()) as BluePrint;
-      const entities = blueprint.blueprint.entities;
-      let minX = 1000000;
-      let minY = 1000000;
-      entities.forEach(e =>
+      const line = this.entityLines[y];
+      if (!line || line.count === 0) continue;
+      for (let x = line.firstX; x <= line.lastX; x++)
       {
-        if (e.position.x < minX) minX = e.position.x;
-        if (e.position.y < minY) minY = e.position.y;
-      });
-      entities.forEach(e =>
-      {
-        const x = (e.position.x - minX + startX) >> 0;
-        const y = (e.position.y - minY + startY) >> 0;
-        const d = e.direction === 2 ? Direction.right : e.direction === 6 ? Direction.left : e.direction === 4 ? Direction.bottom : Direction.top;
-        switch (e.name)
+        const e = line[x];
+        if (e)
         {
-          case "transport-belt": this.add(x, y, EntityType.transportBelt, d); break;
+          entities.push(new MapEntity(e.x, e.y, e.t, e.d)); // create a new instance of MapEntity
         }
-      });
-      return true;
+      }
     }
-    catch (exc)
-    {
-      return false;
-    }
+
+    return Blueprint.encodeBlueprint(label, entities);
   }
 
   /** get entity 

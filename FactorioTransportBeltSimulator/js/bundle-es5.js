@@ -501,10 +501,10 @@ var Game = (function () {
         this.display = new Display(gameDiv, canvasWidth, canvasHeight, this.map);
         var m = this.map;
         var loopBp = "0eNqd092ugyAMAOB36TVbxCFuvMpysujWLCRaDXTLMYZ3H+rNOZlLJpfl5yvQMkLdPLB3lhjMCPbakQdzHsHbO1XNNMZDj2DAMrYggKp2ithV5PvO8a7GhiEIsHTDXzAy/AhAYssWF2kOhgs92hpdXPDJENB3Pm7raMoaqZ1U+0LAAOa0L2KGm3V4XebzIN7gfAOcf4LVCnzYAB+2nFglPIWUUV6xihQrW7d0woXnc/27sV6Ry4QafScfU+Tsvfyxe+dON38+hoCmitZko2cZ4yc6v5T1KFWpTqUuZaYLHcILdU8UnQ==";
-        m.loadBlueprint(1, 1, loopBp);
-        m.loadBlueprint(5, 1, loopBp);
-        m.loadBlueprint(1, 5, loopBp);
-        m.loadBlueprint(5, 5, loopBp);
+        m.addBlueprint(1, 1, loopBp);
+        m.addBlueprint(5, 1, loopBp);
+        m.addBlueprint(1, 5, loopBp);
+        m.addBlueprint(5, 5, loopBp);
     }
     Game.prototype.uiUpdate = function () {
         if (keys[107]) {
@@ -595,73 +595,6 @@ var Game = (function () {
     };
     return Game;
 }());
-var Sprites = (function () {
-    function Sprites() {
-        var _this = this;
-        this.loadChecked = false;
-        Sprites.loadImg("/factorio/data/base/graphics/terrain/tutorial-grid/hr-tutorial-grid1.png", function (img) { _this.tutorialGrid = img; });
-        var path = "/factorio/data/base/graphics/entity/";
-        Sprites.loadImg(path + "transport-belt/hr-transport-belt.png", function (img) { _this.transportBelt = img; });
-        Sprites.loadImg(path + "splitter/hr-splitter-north.png", function (img) { _this.splitterNorth = img; });
-        Sprites.loadImg(path + "splitter/hr-splitter-south.png", function (img) { _this.splitterSouth = img; });
-        Sprites.loadImg(path + "splitter/hr-splitter-east-top_patch.png", function (img) { _this.splitterEastTop = img; });
-        Sprites.loadImg(path + "splitter/hr-splitter-east.png", function (img) { _this.splitterEast = img; });
-        Sprites.loadImg(path + "splitter/hr-splitter-west-top_patch.png", function (img) { _this.splitterWestTop = img; });
-        Sprites.loadImg(path + "splitter/hr-splitter-west.png", function (img) { _this.splitterWest = img; });
-        Sprites.loadImg(path + "underground-belt/underground-belt-structure.png", function (img) { _this.undergroundBelt = img; });
-    }
-    Sprites.loadImg = function (url, callback) {
-        var _this = this;
-        var img = new Image();
-        img.onload = function () { return callback(img); };
-        img.onerror = function () {
-            console.error("load error: " + url);
-            if (_this.showError)
-                return;
-            alert("load error: " + url);
-            _this.showError = true;
-        };
-        img.src = url;
-    };
-    Sprites.prototype.hasLoaded = function () {
-        if (this.loadChecked)
-            return true;
-        var check = this.tutorialGrid
-            && this.transportBelt
-            && this.splitterNorth && this.splitterSouth && this.splitterWestTop && this.splitterWest && this.splitterEastTop && this.splitterEast
-            && this.undergroundBelt
-            && true;
-        if (check)
-            this.loadChecked = true;
-        return check;
-    };
-    Sprites.showError = false;
-    return Sprites;
-}());
-var requestAnimFrame = (function () { return (window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || (function (cb) { return window.setTimeout(cb, 1000 / 60); })); })();
-function getDocumentSize() {
-    var body = document.body;
-    var html = document.documentElement;
-    return {
-        width: Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth),
-        height: Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
-    };
-}
-var Easing = {
-    linear: function (t) { return t; },
-    easeInQuad: function (t) { return t * t; },
-    easeOutQuad: function (t) { return t * (2 - t); },
-    easeInOutQuad: function (t) { return t < .5 ? 2 * t * t : -1 + (4 - 2 * t) * t; },
-    easeInCubic: function (t) { return t * t * t; },
-    easeOutCubic: function (t) { return (--t) * t * t + 1; },
-    easeInOutCubic: function (t) { return t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1; },
-    easeInQuart: function (t) { return t * t * t * t; },
-    easeOutQuart: function (t) { return 1 - (--t) * t * t * t; },
-    easeInOutQuart: function (t) { return t < .5 ? 8 * t * t * t * t : 1 - 8 * (--t) * t * t * t; },
-    easeInQuint: function (t) { return t * t * t * t * t; },
-    easeOutQuint: function (t) { return 1 + (--t) * t * t * t * t; },
-    easeInOutQuint: function (t) { return t < .5 ? 16 * t * t * t * t * t : 1 + 16 * (--t) * t * t * t * t; }
-};
 var EntityType;
 (function (EntityType) {
     EntityType[EntityType["transportBelt"] = 0] = "transportBelt";
@@ -790,36 +723,29 @@ var Map = (function () {
         }
         this.updatFirstLast(x, y);
     };
-    Map.prototype.loadBlueprint = function (startX, startY, base64) {
+    Map.prototype.addBlueprint = function (startX, startY, base64) {
         var _this = this;
-        try {
-            if (base64[0] !== "0")
-                return false;
-            var blueprint = JSON.parse(pako.inflate(atob(base64.substr(1)), { to: "string" }).toString());
-            var entities = blueprint.blueprint.entities;
-            var minX_1 = 1000000;
-            var minY_1 = 1000000;
-            entities.forEach(function (e) {
-                if (e.position.x < minX_1)
-                    minX_1 = e.position.x;
-                if (e.position.y < minY_1)
-                    minY_1 = e.position.y;
-            });
-            entities.forEach(function (e) {
-                var x = (e.position.x - minX_1 + startX) >> 0;
-                var y = (e.position.y - minY_1 + startY) >> 0;
-                var d = e.direction === 2 ? Direction.right : e.direction === 6 ? Direction.left : e.direction === 4 ? Direction.bottom : Direction.top;
-                switch (e.name) {
-                    case "transport-belt":
-                        _this.add(x, y, EntityType.transportBelt, d);
-                        break;
-                }
-            });
-            return true;
-        }
-        catch (exc) {
+        var r = Blueprint.decodeBlueprint(base64);
+        if (r.length === 0)
             return false;
+        r.forEach(function (e) { _this.add(e.x + startX, e.y + startY, e.t, e.d); });
+        return true;
+    };
+    Map.prototype.getBlueprint = function (label) {
+        if (label === void 0) { label = "blueprint"; }
+        var entities = [];
+        for (var y = 0; y < this.entityLines.length; y++) {
+            var line = this.entityLines[y];
+            if (!line || line.count === 0)
+                continue;
+            for (var x = line.firstX; x <= line.lastX; x++) {
+                var e = line[x];
+                if (e) {
+                    entities.push(new MapEntity(e.x, e.y, e.t, e.d));
+                }
+            }
         }
+        return Blueprint.encodeBlueprint(label, entities);
     };
     Map.prototype.getEntity = function (x, y) {
         var line = this.entityLines[y];
@@ -844,5 +770,139 @@ var Map = (function () {
         }
     };
     return Map;
+}());
+var Sprites = (function () {
+    function Sprites() {
+        var _this = this;
+        this.loadChecked = false;
+        Sprites.loadImg("/factorio/data/base/graphics/terrain/tutorial-grid/hr-tutorial-grid1.png", function (img) { _this.tutorialGrid = img; });
+        var path = "/factorio/data/base/graphics/entity/";
+        Sprites.loadImg(path + "transport-belt/hr-transport-belt.png", function (img) { _this.transportBelt = img; });
+        Sprites.loadImg(path + "splitter/hr-splitter-north.png", function (img) { _this.splitterNorth = img; });
+        Sprites.loadImg(path + "splitter/hr-splitter-south.png", function (img) { _this.splitterSouth = img; });
+        Sprites.loadImg(path + "splitter/hr-splitter-east-top_patch.png", function (img) { _this.splitterEastTop = img; });
+        Sprites.loadImg(path + "splitter/hr-splitter-east.png", function (img) { _this.splitterEast = img; });
+        Sprites.loadImg(path + "splitter/hr-splitter-west-top_patch.png", function (img) { _this.splitterWestTop = img; });
+        Sprites.loadImg(path + "splitter/hr-splitter-west.png", function (img) { _this.splitterWest = img; });
+        Sprites.loadImg(path + "underground-belt/underground-belt-structure.png", function (img) { _this.undergroundBelt = img; });
+    }
+    Sprites.loadImg = function (url, callback) {
+        var _this = this;
+        var img = new Image();
+        img.onload = function () { return callback(img); };
+        img.onerror = function () {
+            console.error("load error: " + url);
+            if (_this.showError)
+                return;
+            alert("load error: " + url);
+            _this.showError = true;
+        };
+        img.src = url;
+    };
+    Sprites.prototype.hasLoaded = function () {
+        if (this.loadChecked)
+            return true;
+        var check = this.tutorialGrid
+            && this.transportBelt
+            && this.splitterNorth && this.splitterSouth && this.splitterWestTop && this.splitterWest && this.splitterEastTop && this.splitterEast
+            && this.undergroundBelt
+            && true;
+        if (check)
+            this.loadChecked = true;
+        return check;
+    };
+    Sprites.showError = false;
+    return Sprites;
+}());
+var requestAnimFrame = (function () { return (window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || (function (cb) { return window.setTimeout(cb, 1000 / 60); })); })();
+function getDocumentSize() {
+    var body = document.body;
+    var html = document.documentElement;
+    return {
+        width: Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth),
+        height: Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
+    };
+}
+var Easing = {
+    linear: function (t) { return t; },
+    easeInQuad: function (t) { return t * t; },
+    easeOutQuad: function (t) { return t * (2 - t); },
+    easeInOutQuad: function (t) { return t < .5 ? 2 * t * t : -1 + (4 - 2 * t) * t; },
+    easeInCubic: function (t) { return t * t * t; },
+    easeOutCubic: function (t) { return (--t) * t * t + 1; },
+    easeInOutCubic: function (t) { return t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1; },
+    easeInQuart: function (t) { return t * t * t * t; },
+    easeOutQuart: function (t) { return 1 - (--t) * t * t * t; },
+    easeInOutQuart: function (t) { return t < .5 ? 8 * t * t * t * t : 1 - 8 * (--t) * t * t * t; },
+    easeInQuint: function (t) { return t * t * t * t * t; },
+    easeOutQuint: function (t) { return 1 + (--t) * t * t * t * t; },
+    easeInOutQuint: function (t) { return t < .5 ? 16 * t * t * t * t * t : 1 + 16 * (--t) * t * t * t * t; }
+};
+var Blueprint = (function () {
+    function Blueprint() {
+    }
+    Blueprint.decodeBlueprint = function (base64) {
+        var result = [];
+        try {
+            if (base64[0] !== "0")
+                return result;
+            var blueprint = JSON.parse(pako.inflate(atob(base64.substr(1)), { to: "string" }).toString());
+            console.log(blueprint);
+            var entities = blueprint.blueprint.entities;
+            var minX_1 = 1000000;
+            var minY_1 = 1000000;
+            entities.forEach(function (e) {
+                if (e.position.x < minX_1)
+                    minX_1 = e.position.x;
+                if (e.position.y < minY_1)
+                    minY_1 = e.position.y;
+            });
+            entities.forEach(function (e) {
+                var x = (e.position.x - minX_1) >> 0;
+                var y = (e.position.y - minY_1) >> 0;
+                var d = e.direction === 2 ? Direction.right : e.direction === 6 ? Direction.left : e.direction === 4 ? Direction.bottom : Direction.top;
+                switch (e.name) {
+                    case "transport-belt":
+                        result.push(new MapEntity(x, y, EntityType.transportBelt, d));
+                        break;
+                }
+            });
+        }
+        catch (exc) { }
+        return result;
+    };
+    Blueprint.encodeBlueprint = function (label, entities) {
+        var result = {
+            blueprint: {
+                icons: [],
+                entities: [],
+                label: label,
+                item: "blueprint",
+                version: 281474976710656
+            }
+        };
+        var count = 0;
+        entities.forEach(function (e) {
+            var next;
+            var dir = e.d === Direction.right ? 2 : e.d === Direction.bottom ? 4 : e.d === Direction.left ? 6 : 0;
+            switch (e.t) {
+                case EntityType.transportBelt:
+                    {
+                        next = {
+                            entity_number: ++count,
+                            name: "transport-belt",
+                            position: { x: e.x, y: e.y },
+                        };
+                        if (dir === 2 || dir === 4 || dir === 6)
+                            next.direction = dir;
+                    }
+                    break;
+            }
+            if (next)
+                result.blueprint.entities.push(next);
+        });
+        return "0" + btoa(pako.deflate(JSON.stringify(result), { to: "string" }).toString());
+    };
+    return Blueprint;
 }());
 //# sourceMappingURL=bundle-es5.js.map
