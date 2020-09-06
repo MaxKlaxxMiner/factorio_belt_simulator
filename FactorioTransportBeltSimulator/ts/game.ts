@@ -20,9 +20,9 @@ class Game
 
     const m = this.map;
 
-    const loopBp = "0eNqdluFugyAUhd/l/qYNF1Crr9Isi7ZkIbFolC5rGt99tF2aZZXscv8Jwc/j4R4uV+j6sx0n5wM0V3CHwc/Q7K8wuw/f9re5cBktNOCCPYEA355uozC1fh6HKWw62wdYBDh/tF/Q4PImwPrggrMP0n1weffnU2enuCDFEDAOc3xt8LevRtQGi20h4BKfzLZYFvHCUhxWfIhyj26yh8cCtULWGWSTRTYcsqGQiwyyztJcZpBVkmxWyBWHTHJjx3HDUDTXT/I89i6EOLfCxCfzf60oM8TKLBswI291lg2oSD78IPV6gpEVNJWAGc55kIIVnNLUpD0pObWp/qLLNTQrUDQ0K1E0Q2pO/WtKlSpJqlKZMGIVyYkUTSyroWGiObKihZRSUIZTCjQ0q4vJhAWsxiVJOllBS23VLq+lIEEfK1KkX9esbkXafc2JFk20YpDxNbTxdnu/CTe/Ls4CPu00P063HZrK1FVZoSyLclm+ARXersg=";
+    const test = "0eNqdluFugyAUhd/l/qYNF1Crr9Isi7ZkIbFolC5rGt99tF2aZZXscv8Jwc/j4R4uV+j6sx0n5wM0V3CHwc/Q7K8wuw/f9re5cBktNOCCPYEA355uozC1fh6HKWw62wdYBDh/tF/Q4PImwPrggrMP0n1weffnU2enuCDFEDAOc3xt8LevRtQGi20h4BKfzLZYFvHCUhxWfIhyj26yh8cCtULWGWSTRTYcsqGQiwyyztJcZpBVkmxWyBWHTHJjx3HDUDTXT/I89i6EOLfCxCfzf60oM8TKLBswI291lg2oSD78IPV6gpEVNJWAGc55kIIVnNLUpD0pObWp/qLLNTQrUDQ0K1E0Q2pO/WtKlSpJqlKZMGIVyYkUTSyroWGiObKihZRSUIZTCjQ0q4vJhAWsxiVJOllBS23VLq+lIEEfK1KkX9esbkXafc2JFk20YpDxNbTxdnu/CTe/Ls4CPu00P063HZrK1FVZoSyLclm+ARXersg=";
 
-    m.addBlueprint(1, 1, loopBp);
+    m.addBlueprint(1, 1, test);
 
     //for (let y = 2; y < 12; y++)
     //{
@@ -33,11 +33,7 @@ class Game
     //  }
     //}
 
-    //m.add(2, 2, EntityType.transportBelt, Direction.right);
-    //m.add(2, 3, EntityType.transportBelt, Direction.right);
-    //m.add(3, 2, EntityType.splitter, Direction.right);
-    //m.add(4, 2, EntityType.transportBelt, Direction.right);
-    //m.add(4, 3, EntityType.transportBelt, Direction.right);
+    //m.add(3, 3, EntityType.splitter, Direction.top);
   }
 
   lastWheel = 0;

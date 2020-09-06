@@ -54,14 +54,17 @@ class MapEntity
   fromLeft(backCheck?: boolean): boolean { return this.ln !== undefined && (this.ln.toRight() || backCheck === true && this.ln.toLeft() && !this.ln.isCurve()); }
   isCurve(): boolean
   {
-    switch (this.d)
+    if (this.t === EntityType.transportBelt)
     {
-      case Direction.top: return !this.fromBottom() && this.fromLeft() !== this.fromRight();
-      case Direction.right: return !this.fromLeft() && this.fromTop() !== this.fromBottom();
-      case Direction.bottom: return !this.fromTop() && this.fromLeft() !== this.fromRight();
-      case Direction.left: return !this.fromRight() && this.fromTop() !== this.fromBottom();
-      default: return false;
+      switch (this.d)
+      {
+        case Direction.top: return !this.fromBottom() && this.fromLeft() !== this.fromRight();
+        case Direction.right: return !this.fromLeft() && this.fromTop() !== this.fromBottom();
+        case Direction.bottom: return !this.fromTop() && this.fromLeft() !== this.fromRight();
+        case Direction.left: return !this.fromRight() && this.fromTop() !== this.fromBottom();
+      }
     }
+    return false;
   }
 }
 
@@ -113,6 +116,30 @@ class Map
     if (!line) return false; // line does not exist
     const entity = line[x];
     if (!entity) return false; // entity not found
+
+    const extraRemoves: { x: number, y: number }[] = [];
+    switch (entity.t)
+    {
+      case EntityType._splitterLeft: {
+        switch (entity.d)
+        {
+          case Direction.top: extraRemoves.push({ x: x + 1, y: y }); break;
+          case Direction.right: extraRemoves.push({ x: x, y: y + 1 }); break;
+          case Direction.bottom: extraRemoves.push({ x: x - 1, y: y }); break;
+          case Direction.left: extraRemoves.push({ x: x, y: y - 1 }); break;
+        }
+      } break;
+      case EntityType._splitterRight: {
+        switch (entity.d)
+        {
+          case Direction.top: extraRemoves.push({ x: x - 1, y: y }); break;
+          case Direction.right: extraRemoves.push({ x: x, y: y - 1 }); break;
+          case Direction.bottom: extraRemoves.push({ x: x + 1, y: y }); break;
+          case Direction.left: extraRemoves.push({ x: x, y: y + 1 }); break;
+        }
+      } break;
+    }
+
     if (entity.ln) { delete line[x - 1].rn; delete entity.ln; } // disconnect left
     if (entity.rn) { delete line[x + 1].ln; delete entity.rn; } // disconnect right
     if (entity.tn) { delete this.entityLines[y - 1][x].bn; delete entity.tn; } // disconnect top
@@ -121,6 +148,12 @@ class Map
     line.count--;
     if (line.count === 0) delete this.entityLines[y]; // delete entire line if last entity removed
     this.updatFirstLast(x, y);
+
+    if (extraRemoves.length > 0)
+    {
+      extraRemoves.forEach(e => { this.removeEntity(e.x, e.y); });
+    }
+
     return true;
   }
 

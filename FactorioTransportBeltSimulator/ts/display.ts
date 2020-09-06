@@ -178,21 +178,37 @@ class Display
             case Direction.top: {
               belt(x, y, BeltType.bottomToTop);
               belt(x + 1, y, BeltType.bottomToTop);
+              if (!e.fromBottom(true)) beltAdds.push({ x: x, y: y + 1, t: BeltType.voidToTop });
+              if (!e.rn.fromBottom(true)) beltAdds.push({ x: x + 1, y: y + 1, t: BeltType.voidToTop });
+              if (e.tn === undefined || !e.tn.isCurve() && !e.fromTop(true)) beltAdds.push({ x: x, y: y - 1, t: BeltType.bottomToVoid });
+              if (e.rn.tn === undefined || !e.rn.tn.isCurve() && !e.rn.fromTop(true)) beltAdds.push({ x: x + 1, y: y - 1, t: BeltType.bottomToVoid });
               entityAdds.push({ x: x, y: y, t: 0, draw: splitter });
             } break;
             case Direction.right: {
               belt(x, y, BeltType.leftToRight);
               belt(x, y + 1, BeltType.leftToRight);
+              if (!e.fromLeft(true)) beltAdds.push({ x: x - 1, y: y, t: BeltType.voidToRight });
+              if (!e.bn.fromLeft(true)) beltAdds.push({ x: x - 1, y: y + 1, t: BeltType.voidToRight });
+              if (e.rn === undefined || !e.rn.isCurve() && !e.fromRight(true)) beltAdds.push({ x: x + 1, y: y, t: BeltType.leftToVoid });
+              if (e.bn.rn === undefined || !e.bn.rn.isCurve() && !e.bn.fromRight(true)) beltAdds.push({ x: x + 1, y: y + 1, t: BeltType.leftToVoid });
               entityAdds.push({ x: x, y: y, t: 3, draw: splitter });
             } break;
             case Direction.bottom: {
               belt(x - 1, y, BeltType.topToBottom);
               belt(x, y, BeltType.topToBottom);
+              if (!e.fromTop(true)) beltAdds.push({ x: x, y: y - 1, t: BeltType.voidToBottom });
+              if (!e.ln.fromTop(true)) beltAdds.push({ x: x - 1, y: y - 1, t: BeltType.voidToBottom });
+              if (e.bn === undefined || !e.bn.isCurve() && !e.fromBottom(true)) beltAdds.push({ x: x, y: y + 1, t: BeltType.topToVoid });
+              if (e.ln.bn === undefined || !e.ln.bn.isCurve() && !e.ln.fromBottom(true)) beltAdds.push({ x: x - 1, y: y + 1, t: BeltType.topToVoid });
               entityAdds.push({ x: x - 1, y: y, t: 1, draw: splitter });
             } break;
             case Direction.left: {
               belt(x, y - 1, BeltType.rightToLeft);
               belt(x, y, BeltType.rightToLeft);
+              if (!e.fromRight(true)) beltAdds.push({ x: x + 1, y: y, t: BeltType.voidToLeft });
+              if (!e.tn.fromRight(true)) beltAdds.push({ x: x + 1, y: y - 1, t: BeltType.voidToLeft });
+              if (e.ln === undefined || !e.ln.isCurve() && !e.fromLeft(true)) beltAdds.push({ x: x - 1, y: y, t: BeltType.rightToVoid });
+              if (e.tn.ln === undefined || !e.tn.ln.isCurve() && !e.tn.fromLeft(true)) beltAdds.push({ x: x - 1, y: y - 1, t: BeltType.rightToVoid });
               entityAdds.push({ x: x, y: y - 1, t: 2, draw: splitter });
             } break;
           }

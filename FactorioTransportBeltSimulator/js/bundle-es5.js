@@ -151,6 +151,14 @@ var Display = (function () {
                                 {
                                     belt(x, y, BeltType.bottomToTop);
                                     belt(x + 1, y, BeltType.bottomToTop);
+                                    if (!e.fromBottom(true))
+                                        beltAdds.push({ x: x, y: y + 1, t: BeltType.voidToTop });
+                                    if (!e.rn.fromBottom(true))
+                                        beltAdds.push({ x: x + 1, y: y + 1, t: BeltType.voidToTop });
+                                    if (e.tn === undefined || !e.tn.isCurve() && !e.fromTop(true))
+                                        beltAdds.push({ x: x, y: y - 1, t: BeltType.bottomToVoid });
+                                    if (e.rn.tn === undefined || !e.rn.tn.isCurve() && !e.rn.fromTop(true))
+                                        beltAdds.push({ x: x + 1, y: y - 1, t: BeltType.bottomToVoid });
                                     entityAdds.push({ x: x, y: y, t: 0, draw: splitter });
                                 }
                                 break;
@@ -158,6 +166,14 @@ var Display = (function () {
                                 {
                                     belt(x, y, BeltType.leftToRight);
                                     belt(x, y + 1, BeltType.leftToRight);
+                                    if (!e.fromLeft(true))
+                                        beltAdds.push({ x: x - 1, y: y, t: BeltType.voidToRight });
+                                    if (!e.bn.fromLeft(true))
+                                        beltAdds.push({ x: x - 1, y: y + 1, t: BeltType.voidToRight });
+                                    if (e.rn === undefined || !e.rn.isCurve() && !e.fromRight(true))
+                                        beltAdds.push({ x: x + 1, y: y, t: BeltType.leftToVoid });
+                                    if (e.bn.rn === undefined || !e.bn.rn.isCurve() && !e.bn.fromRight(true))
+                                        beltAdds.push({ x: x + 1, y: y + 1, t: BeltType.leftToVoid });
                                     entityAdds.push({ x: x, y: y, t: 3, draw: splitter });
                                 }
                                 break;
@@ -165,6 +181,14 @@ var Display = (function () {
                                 {
                                     belt(x - 1, y, BeltType.topToBottom);
                                     belt(x, y, BeltType.topToBottom);
+                                    if (!e.fromTop(true))
+                                        beltAdds.push({ x: x, y: y - 1, t: BeltType.voidToBottom });
+                                    if (!e.ln.fromTop(true))
+                                        beltAdds.push({ x: x - 1, y: y - 1, t: BeltType.voidToBottom });
+                                    if (e.bn === undefined || !e.bn.isCurve() && !e.fromBottom(true))
+                                        beltAdds.push({ x: x, y: y + 1, t: BeltType.topToVoid });
+                                    if (e.ln.bn === undefined || !e.ln.bn.isCurve() && !e.ln.fromBottom(true))
+                                        beltAdds.push({ x: x - 1, y: y + 1, t: BeltType.topToVoid });
                                     entityAdds.push({ x: x - 1, y: y, t: 1, draw: splitter });
                                 }
                                 break;
@@ -172,6 +196,14 @@ var Display = (function () {
                                 {
                                     belt(x, y - 1, BeltType.rightToLeft);
                                     belt(x, y, BeltType.rightToLeft);
+                                    if (!e.fromRight(true))
+                                        beltAdds.push({ x: x + 1, y: y, t: BeltType.voidToLeft });
+                                    if (!e.tn.fromRight(true))
+                                        beltAdds.push({ x: x + 1, y: y - 1, t: BeltType.voidToLeft });
+                                    if (e.ln === undefined || !e.ln.isCurve() && !e.fromLeft(true))
+                                        beltAdds.push({ x: x - 1, y: y, t: BeltType.rightToVoid });
+                                    if (e.tn.ln === undefined || !e.tn.ln.isCurve() && !e.tn.fromLeft(true))
+                                        beltAdds.push({ x: x - 1, y: y - 1, t: BeltType.rightToVoid });
                                     entityAdds.push({ x: x, y: y - 1, t: 2, draw: splitter });
                                 }
                                 break;
@@ -500,8 +532,8 @@ var Game = (function () {
         this.map = new Map();
         this.display = new Display(gameDiv, canvasWidth, canvasHeight, this.map);
         var m = this.map;
-        var loopBp = "0eNqdluFugyAUhd/l/qYNF1Crr9Isi7ZkIbFolC5rGt99tF2aZZXscv8Jwc/j4R4uV+j6sx0n5wM0V3CHwc/Q7K8wuw/f9re5cBktNOCCPYEA355uozC1fh6HKWw62wdYBDh/tF/Q4PImwPrggrMP0n1weffnU2enuCDFEDAOc3xt8LevRtQGi20h4BKfzLZYFvHCUhxWfIhyj26yh8cCtULWGWSTRTYcsqGQiwyyztJcZpBVkmxWyBWHTHJjx3HDUDTXT/I89i6EOLfCxCfzf60oM8TKLBswI291lg2oSD78IPV6gpEVNJWAGc55kIIVnNLUpD0pObWp/qLLNTQrUDQ0K1E0Q2pO/WtKlSpJqlKZMGIVyYkUTSyroWGiObKihZRSUIZTCjQ0q4vJhAWsxiVJOllBS23VLq+lIEEfK1KkX9esbkXafc2JFk20YpDxNbTxdnu/CTe/Ls4CPu00P063HZrK1FVZoSyLclm+ARXersg=";
-        m.addBlueprint(1, 1, loopBp);
+        var test = "0eNqdluFugyAUhd/l/qYNF1Crr9Isi7ZkIbFolC5rGt99tF2aZZXscv8Jwc/j4R4uV+j6sx0n5wM0V3CHwc/Q7K8wuw/f9re5cBktNOCCPYEA355uozC1fh6HKWw62wdYBDh/tF/Q4PImwPrggrMP0n1weffnU2enuCDFEDAOc3xt8LevRtQGi20h4BKfzLZYFvHCUhxWfIhyj26yh8cCtULWGWSTRTYcsqGQiwyyztJcZpBVkmxWyBWHTHJjx3HDUDTXT/I89i6EOLfCxCfzf60oM8TKLBswI291lg2oSD78IPV6gpEVNJWAGc55kIIVnNLUpD0pObWp/qLLNTQrUDQ0K1E0Q2pO/WtKlSpJqlKZMGIVyYkUTSyroWGiObKihZRSUIZTCjQ0q4vJhAWsxiVJOllBS23VLq+lIEEfK1KkX9esbkXafc2JFk20YpDxNbTxdnu/CTe/Ls4CPu00P063HZrK1FVZoSyLclm+ARXersg=";
+        m.addBlueprint(1, 1, test);
     }
     Game.prototype.uiUpdate = function () {
         if (keys[107]) {
@@ -622,13 +654,15 @@ var MapEntity = (function () {
     MapEntity.prototype.fromBottom = function (backCheck) { return this.bn !== undefined && (this.bn.toTop() || backCheck === true && this.bn.toBottom() && !this.bn.isCurve()); };
     MapEntity.prototype.fromLeft = function (backCheck) { return this.ln !== undefined && (this.ln.toRight() || backCheck === true && this.ln.toLeft() && !this.ln.isCurve()); };
     MapEntity.prototype.isCurve = function () {
-        switch (this.d) {
-            case Direction.top: return !this.fromBottom() && this.fromLeft() !== this.fromRight();
-            case Direction.right: return !this.fromLeft() && this.fromTop() !== this.fromBottom();
-            case Direction.bottom: return !this.fromTop() && this.fromLeft() !== this.fromRight();
-            case Direction.left: return !this.fromRight() && this.fromTop() !== this.fromBottom();
-            default: return false;
+        if (this.t === EntityType.transportBelt) {
+            switch (this.d) {
+                case Direction.top: return !this.fromBottom() && this.fromLeft() !== this.fromRight();
+                case Direction.right: return !this.fromLeft() && this.fromTop() !== this.fromBottom();
+                case Direction.bottom: return !this.fromTop() && this.fromLeft() !== this.fromRight();
+                case Direction.left: return !this.fromRight() && this.fromTop() !== this.fromBottom();
+            }
         }
+        return false;
     };
     return MapEntity;
 }());
@@ -662,12 +696,52 @@ var Map = (function () {
             this.entityLines.length--;
     };
     Map.prototype.removeEntity = function (x, y) {
+        var _this = this;
         var line = this.entityLines[y];
         if (!line)
             return false;
         var entity = line[x];
         if (!entity)
             return false;
+        var extraRemoves = [];
+        switch (entity.t) {
+            case EntityType._splitterLeft:
+                {
+                    switch (entity.d) {
+                        case Direction.top:
+                            extraRemoves.push({ x: x + 1, y: y });
+                            break;
+                        case Direction.right:
+                            extraRemoves.push({ x: x, y: y + 1 });
+                            break;
+                        case Direction.bottom:
+                            extraRemoves.push({ x: x - 1, y: y });
+                            break;
+                        case Direction.left:
+                            extraRemoves.push({ x: x, y: y - 1 });
+                            break;
+                    }
+                }
+                break;
+            case EntityType._splitterRight:
+                {
+                    switch (entity.d) {
+                        case Direction.top:
+                            extraRemoves.push({ x: x - 1, y: y });
+                            break;
+                        case Direction.right:
+                            extraRemoves.push({ x: x, y: y - 1 });
+                            break;
+                        case Direction.bottom:
+                            extraRemoves.push({ x: x + 1, y: y });
+                            break;
+                        case Direction.left:
+                            extraRemoves.push({ x: x, y: y + 1 });
+                            break;
+                    }
+                }
+                break;
+        }
         if (entity.ln) {
             delete line[x - 1].rn;
             delete entity.ln;
@@ -689,6 +763,9 @@ var Map = (function () {
         if (line.count === 0)
             delete this.entityLines[y];
         this.updatFirstLast(x, y);
+        if (extraRemoves.length > 0) {
+            extraRemoves.forEach(function (e) { _this.removeEntity(e.x, e.y); });
+        }
         return true;
     };
     Map.prototype.add = function (x, y, e, d) {
