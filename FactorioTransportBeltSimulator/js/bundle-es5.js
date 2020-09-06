@@ -66,7 +66,8 @@ var Display = (function () {
             c.imageSmoothingEnabled = true;
         var belt = this.entityTransportBelt.draw;
         var splitter = this.entitySplitter.draw;
-        var additives = [];
+        var beltAdds = [];
+        var entityAdds = [];
         this.map.callEntities(0, 0, 100, 100, function (x, y, e) {
             switch (e.t) {
                 case EntityType.transportBelt:
@@ -83,10 +84,10 @@ var Display = (function () {
                                     else {
                                         belt(x, y, BeltType.bottomToTop);
                                         if (!e.fromBottom(true))
-                                            additives.push({ x: x, y: y + 1, t: BeltType.voidToTop });
+                                            beltAdds.push({ x: x, y: y + 1, t: BeltType.voidToTop });
                                     }
                                     if (e.tn === undefined || !e.tn.isCurve() && !e.fromTop(true))
-                                        additives.push({ x: x, y: y - 1, t: BeltType.bottomToVoid });
+                                        beltAdds.push({ x: x, y: y - 1, t: BeltType.bottomToVoid });
                                 }
                                 break;
                             case Direction.right:
@@ -100,10 +101,10 @@ var Display = (function () {
                                     else {
                                         belt(x, y, BeltType.leftToRight);
                                         if (!e.fromLeft(true))
-                                            additives.push({ x: x - 1, y: y, t: BeltType.voidToRight });
+                                            beltAdds.push({ x: x - 1, y: y, t: BeltType.voidToRight });
                                     }
                                     if (e.rn === undefined || !e.rn.isCurve() && !e.fromRight(true))
-                                        additives.push({ x: x + 1, y: y, t: BeltType.leftToVoid });
+                                        beltAdds.push({ x: x + 1, y: y, t: BeltType.leftToVoid });
                                 }
                                 break;
                             case Direction.bottom:
@@ -117,10 +118,10 @@ var Display = (function () {
                                     else {
                                         belt(x, y, BeltType.topToBottom);
                                         if (!e.fromTop(true))
-                                            additives.push({ x: x, y: y - 1, t: BeltType.voidToBottom });
+                                            beltAdds.push({ x: x, y: y - 1, t: BeltType.voidToBottom });
                                     }
                                     if (e.bn === undefined || !e.bn.isCurve() && !e.fromBottom(true))
-                                        additives.push({ x: x, y: y + 1, t: BeltType.topToVoid });
+                                        beltAdds.push({ x: x, y: y + 1, t: BeltType.topToVoid });
                                 }
                                 break;
                             case Direction.left:
@@ -134,10 +135,44 @@ var Display = (function () {
                                     else {
                                         belt(x, y, BeltType.rightToLeft);
                                         if (!e.fromRight(true))
-                                            additives.push({ x: x + 1, y: y, t: BeltType.voidToLeft });
+                                            beltAdds.push({ x: x + 1, y: y, t: BeltType.voidToLeft });
                                     }
                                     if (e.ln === undefined || !e.ln.isCurve() && !e.fromLeft(true))
-                                        additives.push({ x: x - 1, y: y, t: BeltType.rightToVoid });
+                                        beltAdds.push({ x: x - 1, y: y, t: BeltType.rightToVoid });
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case EntityType._splitterLeft:
+                    {
+                        switch (e.d) {
+                            case Direction.top:
+                                {
+                                    belt(x, y, BeltType.bottomToTop);
+                                    belt(x + 1, y, BeltType.bottomToTop);
+                                    entityAdds.push({ x: x, y: y, t: 0, draw: splitter });
+                                }
+                                break;
+                            case Direction.right:
+                                {
+                                    belt(x, y, BeltType.leftToRight);
+                                    belt(x, y + 1, BeltType.leftToRight);
+                                    entityAdds.push({ x: x, y: y, t: 3, draw: splitter });
+                                }
+                                break;
+                            case Direction.bottom:
+                                {
+                                    belt(x - 1, y, BeltType.topToBottom);
+                                    belt(x, y, BeltType.topToBottom);
+                                    entityAdds.push({ x: x - 1, y: y, t: 1, draw: splitter });
+                                }
+                                break;
+                            case Direction.left:
+                                {
+                                    belt(x, y - 1, BeltType.rightToLeft);
+                                    belt(x, y, BeltType.rightToLeft);
+                                    entityAdds.push({ x: x, y: y - 1, t: 2, draw: splitter });
                                 }
                                 break;
                         }
@@ -145,32 +180,11 @@ var Display = (function () {
                     break;
             }
         });
-        additives.forEach(function (add) {
+        beltAdds.forEach(function (add) {
             belt(add.x, add.y, add.t);
         });
-        this.map.callEntities(0, 0, 100, 100, function (x, y, e) {
-            switch (e.t) {
-                case EntityType.splitterLeft:
-                    {
-                        switch (e.d) {
-                            case Direction.right:
-                                {
-                                }
-                                break;
-                        }
-                    }
-                    break;
-                case EntityType.splitterRight:
-                    {
-                        switch (e.d) {
-                            case Direction.right:
-                                {
-                                }
-                                break;
-                        }
-                    }
-                    break;
-            }
+        entityAdds.forEach(function (add) {
+            add.draw(add.x, add.y, add.t, add.animate);
         });
         var helpLines = function (x, y, width, height) {
             c.beginPath();
@@ -301,7 +315,6 @@ var DisplayEntitySplitterSouth = (function (_super) {
     }
     DisplayEntitySplitterSouth.prototype.prepareForDisplay = function (display) {
         _super.prototype.prepareForDisplay.call(this, display);
-        this.belt = display.entityTransportBelt;
         this.sprite = display.sprites.splitterSouth;
         this.ofsX -= this.scale * 0.155;
         this.scaleX *= 2.56;
@@ -310,8 +323,6 @@ var DisplayEntitySplitterSouth = (function (_super) {
         this.animate = this.animate * 0.70 & 31;
     };
     DisplayEntitySplitterSouth.prototype.draw = function (x, y, type, animate) {
-        this.belt.draw(x, y, 3);
-        this.belt.draw(x + 1, y, 3);
         if (animate === undefined)
             animate = this.animate;
         this.ctx.drawImage(this.sprite, (animate & 7) * this.spriteW, (animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
@@ -325,7 +336,6 @@ var DisplayEntitySplitterNorth = (function (_super) {
     }
     DisplayEntitySplitterNorth.prototype.prepareForDisplay = function (display) {
         _super.prototype.prepareForDisplay.call(this, display);
-        this.belt = display.entityTransportBelt;
         this.sprite = display.sprites.splitterNorth;
         this.ofsX -= this.scale * 0.03;
         this.ofsY -= this.scale * 0.05;
@@ -336,8 +346,6 @@ var DisplayEntitySplitterNorth = (function (_super) {
         this.animate = this.animate * 0.70 & 31;
     };
     DisplayEntitySplitterNorth.prototype.draw = function (x, y, type, animate) {
-        this.belt.draw(x, y, 2);
-        this.belt.draw(x + 1, y, 2);
         if (animate === undefined)
             animate = this.animate;
         this.ctx.drawImage(this.sprite, (animate & 7) * this.spriteW, (animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
@@ -351,7 +359,6 @@ var DisplayEntitySplitterWestTop = (function (_super) {
     }
     DisplayEntitySplitterWestTop.prototype.prepareForDisplay = function (display) {
         _super.prototype.prepareForDisplay.call(this, display);
-        this.belt = display.entityTransportBelt;
         this.sprite = display.sprites.splitterWestTop;
         this.spriteW = this.sprite.width / 8 >> 0;
         this.spriteH = this.sprite.height / 4 >> 0;
@@ -362,7 +369,6 @@ var DisplayEntitySplitterWestTop = (function (_super) {
         this.animate = this.animate * 0.70 & 31;
     };
     DisplayEntitySplitterWestTop.prototype.draw = function (x, y, type, animate) {
-        this.belt.draw(x, y, 1);
         if (animate === undefined)
             animate = this.animate;
         this.ctx.drawImage(this.sprite, (animate & 7) * this.spriteW, (animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
@@ -379,7 +385,6 @@ var DisplayEntitySplitterWest = (function (_super) {
     DisplayEntitySplitterWest.prototype.prepareForDisplay = function (display) {
         _super.prototype.prepareForDisplay.call(this, display);
         this.top.prepareForDisplay(display);
-        this.belt = display.entityTransportBelt;
         this.sprite = display.sprites.splitterWest;
         this.spriteW = this.sprite.width / 8 >> 0;
         this.spriteH = this.sprite.height / 4 >> 0;
@@ -391,7 +396,6 @@ var DisplayEntitySplitterWest = (function (_super) {
     };
     DisplayEntitySplitterWest.prototype.draw = function (x, y, type, animate) {
         this.top.draw(x, y, type, animate);
-        this.belt.draw(x, y + 1, 1);
         if (animate === undefined)
             animate = this.animate;
         this.ctx.drawImage(this.sprite, (animate & 7) * this.spriteW, (animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, (y + 1) * this.scale + this.ofsY, this.scaleX, this.scaleY);
@@ -405,7 +409,6 @@ var DisplayEntitySplitterEastTop = (function (_super) {
     }
     DisplayEntitySplitterEastTop.prototype.prepareForDisplay = function (display) {
         _super.prototype.prepareForDisplay.call(this, display);
-        this.belt = display.entityTransportBelt;
         this.sprite = display.sprites.splitterEastTop;
         this.spriteW = this.sprite.width / 8 >> 0;
         this.spriteH = this.sprite.height / 4 >> 0;
@@ -416,7 +419,6 @@ var DisplayEntitySplitterEastTop = (function (_super) {
         this.animate = this.animate * 0.70 & 31;
     };
     DisplayEntitySplitterEastTop.prototype.draw = function (x, y, type, animate) {
-        this.belt.draw(x, y, 0);
         if (animate === undefined)
             animate = this.animate;
         this.ctx.drawImage(this.sprite, (animate & 7) * this.spriteW, (animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, y * this.scale + this.ofsY, this.scaleX, this.scaleY);
@@ -433,19 +435,17 @@ var DisplayEntitySplitterEast = (function (_super) {
     DisplayEntitySplitterEast.prototype.prepareForDisplay = function (display) {
         _super.prototype.prepareForDisplay.call(this, display);
         this.top.prepareForDisplay(display);
-        this.belt = display.entityTransportBelt;
         this.sprite = display.sprites.splitterEast;
         this.spriteW = this.sprite.width / 8 >> 0;
         this.spriteH = this.sprite.height / 4 >> 0;
         this.ofsX -= this.scale * 0.075;
         this.ofsY -= this.scale * 0.25;
         this.scaleX *= 1.40;
-        this.scaleY *= 1.31;
+        this.scaleY *= 1.303;
         this.animate = this.animate * 0.70 & 31;
     };
     DisplayEntitySplitterEast.prototype.draw = function (x, y, type, animate) {
         this.top.draw(x, y, type, animate);
-        this.belt.draw(x, y + 1, 0);
         if (animate === undefined)
             animate = this.animate;
         this.ctx.drawImage(this.sprite, (animate & 7) * this.spriteW, (animate >> 3) * this.spriteH, this.spriteW, this.spriteH, x * this.scale + this.ofsX, (y + 1) * this.scale + this.ofsY, this.scaleX, this.scaleY);
@@ -500,11 +500,8 @@ var Game = (function () {
         this.map = new Map();
         this.display = new Display(gameDiv, canvasWidth, canvasHeight, this.map);
         var m = this.map;
-        var loopBp = "0eNqd092ugyAMAOB36TVbxCFuvMpysujWLCRaDXTLMYZ3H+rNOZlLJpfl5yvQMkLdPLB3lhjMCPbakQdzHsHbO1XNNMZDj2DAMrYggKp2ithV5PvO8a7GhiEIsHTDXzAy/AhAYssWF2kOhgs92hpdXPDJENB3Pm7raMoaqZ1U+0LAAOa0L2KGm3V4XebzIN7gfAOcf4LVCnzYAB+2nFglPIWUUV6xihQrW7d0woXnc/27sV6Ry4QafScfU+Tsvfyxe+dON38+hoCmitZko2cZ4yc6v5T1KFWpTqUuZaYLHcILdU8UnQ==";
+        var loopBp = "0eNqdluFugyAUhd/l/qYNF1Crr9Isi7ZkIbFolC5rGt99tF2aZZXscv8Jwc/j4R4uV+j6sx0n5wM0V3CHwc/Q7K8wuw/f9re5cBktNOCCPYEA355uozC1fh6HKWw62wdYBDh/tF/Q4PImwPrggrMP0n1weffnU2enuCDFEDAOc3xt8LevRtQGi20h4BKfzLZYFvHCUhxWfIhyj26yh8cCtULWGWSTRTYcsqGQiwyyztJcZpBVkmxWyBWHTHJjx3HDUDTXT/I89i6EOLfCxCfzf60oM8TKLBswI291lg2oSD78IPV6gpEVNJWAGc55kIIVnNLUpD0pObWp/qLLNTQrUDQ0K1E0Q2pO/WtKlSpJqlKZMGIVyYkUTSyroWGiObKihZRSUIZTCjQ0q4vJhAWsxiVJOllBS23VLq+lIEEfK1KkX9esbkXafc2JFk20YpDxNbTxdnu/CTe/Ls4CPu00P063HZrK1FVZoSyLclm+ARXersg=";
         m.addBlueprint(1, 1, loopBp);
-        m.addBlueprint(5, 1, loopBp);
-        m.addBlueprint(1, 5, loopBp);
-        m.addBlueprint(5, 5, loopBp);
     }
     Game.prototype.uiUpdate = function () {
         if (keys[107]) {
@@ -598,8 +595,9 @@ var Game = (function () {
 var EntityType;
 (function (EntityType) {
     EntityType[EntityType["transportBelt"] = 0] = "transportBelt";
-    EntityType[EntityType["splitterLeft"] = 1] = "splitterLeft";
-    EntityType[EntityType["splitterRight"] = 2] = "splitterRight";
+    EntityType[EntityType["splitter"] = 1] = "splitter";
+    EntityType[EntityType["_splitterLeft"] = 2] = "_splitterLeft";
+    EntityType[EntityType["_splitterRight"] = 3] = "_splitterRight";
 })(EntityType || (EntityType = {}));
 var Direction;
 (function (Direction) {
@@ -694,6 +692,35 @@ var Map = (function () {
         return true;
     };
     Map.prototype.add = function (x, y, e, d) {
+        if (e === EntityType.splitter) {
+            switch (d) {
+                case Direction.top:
+                    {
+                        this.add(x, y, EntityType._splitterLeft, d);
+                        this.add(x + 1, y, EntityType._splitterRight, d);
+                    }
+                    break;
+                case Direction.right:
+                    {
+                        this.add(x, y, EntityType._splitterLeft, d);
+                        this.add(x, y + 1, EntityType._splitterRight, d);
+                    }
+                    break;
+                case Direction.bottom:
+                    {
+                        this.add(x, y, EntityType._splitterRight, d);
+                        this.add(x + 1, y, EntityType._splitterLeft, d);
+                    }
+                    break;
+                case Direction.left:
+                    {
+                        this.add(x, y, EntityType._splitterRight, d);
+                        this.add(x, y + 1, EntityType._splitterLeft, d);
+                    }
+                    break;
+            }
+            return;
+        }
         var newEntity = new MapEntity(x, y, e, d);
         this.removeEntity(x, y);
         var lineT = this.entityLines[y - 1];
@@ -858,12 +885,15 @@ var Blueprint = (function () {
                     minY_1 = e.position.y;
             });
             entities.forEach(function (e) {
-                var x = (e.position.x - minX_1) >> 0;
-                var y = (e.position.y - minY_1) >> 0;
+                var x = (e.position.x - minX_1 + .01) >> 0;
+                var y = (e.position.y - minY_1 + .01) >> 0;
                 var d = e.direction === 2 ? Direction.right : e.direction === 6 ? Direction.left : e.direction === 4 ? Direction.bottom : Direction.top;
                 switch (e.name) {
                     case "transport-belt":
                         result.push(new MapEntity(x, y, EntityType.transportBelt, d));
+                        break;
+                    case "splitter":
+                        result.push(new MapEntity(x, y, EntityType.splitter, d));
                         break;
                 }
             });
@@ -891,10 +921,36 @@ var Blueprint = (function () {
                         next = {
                             entity_number: ++count,
                             name: "transport-belt",
-                            position: { x: e.x, y: e.y },
+                            position: { x: e.x + 0.5, y: e.y + 0.5 }
                         };
                         if (dir === 2 || dir === 4 || dir === 6)
                             next.direction = dir;
+                    }
+                    break;
+                case EntityType._splitterLeft:
+                    {
+                        next = {
+                            entity_number: ++count,
+                            name: "splitter",
+                            position: { x: e.x, y: e.y }
+                        };
+                        switch (e.d) {
+                            case Direction.top:
+                                next.position.x += 0.5;
+                                break;
+                            case Direction.right:
+                                next.position.y += 0.5;
+                                next.direction = 2;
+                                break;
+                            case Direction.bottom:
+                                next.position.x -= 0.5;
+                                next.direction = 4;
+                                break;
+                            case Direction.left:
+                                next.position.y -= 0.5;
+                                next.direction = 6;
+                                break;
+                        }
                     }
                     break;
             }

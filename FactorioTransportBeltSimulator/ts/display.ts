@@ -105,7 +105,8 @@ class Display
     //todo: optimize viewport
 
     // --- pipeline step 2: draw transport belts ---
-    const additives: { x: number, y: number, t: BeltType }[] = [];
+    const beltAdds: { x: number, y: number, t: BeltType }[] = [];
+    const entityAdds: { x: number, y: number, t: number, animate?: number, draw: (x: number, y: number, type: number, animate?: number) => void }[] = [];
     this.map.callEntities(0, 0, 100, 100, (x, y, e) =>
     {
       switch (e.t)
@@ -122,9 +123,9 @@ class Display
               else
               {
                 belt(x, y, BeltType.bottomToTop);
-                if (!e.fromBottom(true)) additives.push({ x: x, y: y + 1, t: BeltType.voidToTop });
+                if (!e.fromBottom(true)) beltAdds.push({ x: x, y: y + 1, t: BeltType.voidToTop });
               }
-              if (e.tn === undefined || !e.tn.isCurve() && !e.fromTop(true)) additives.push({ x: x, y: y - 1, t: BeltType.bottomToVoid });
+              if (e.tn === undefined || !e.tn.isCurve() && !e.fromTop(true)) beltAdds.push({ x: x, y: y - 1, t: BeltType.bottomToVoid });
             } break;
 
             case Direction.right: {
@@ -136,9 +137,9 @@ class Display
               else
               {
                 belt(x, y, BeltType.leftToRight);
-                if (!e.fromLeft(true)) additives.push({ x: x - 1, y: y, t: BeltType.voidToRight });
+                if (!e.fromLeft(true)) beltAdds.push({ x: x - 1, y: y, t: BeltType.voidToRight });
               }
-              if (e.rn === undefined || !e.rn.isCurve() && !e.fromRight(true)) additives.push({ x: x + 1, y: y, t: BeltType.leftToVoid });
+              if (e.rn === undefined || !e.rn.isCurve() && !e.fromRight(true)) beltAdds.push({ x: x + 1, y: y, t: BeltType.leftToVoid });
             } break;
 
             case Direction.bottom: {
@@ -150,9 +151,9 @@ class Display
               else
               {
                 belt(x, y, BeltType.topToBottom);
-                if (!e.fromTop(true)) additives.push({ x: x, y: y - 1, t: BeltType.voidToBottom });
+                if (!e.fromTop(true)) beltAdds.push({ x: x, y: y - 1, t: BeltType.voidToBottom });
               }
-              if (e.bn === undefined || !e.bn.isCurve() && !e.fromBottom(true)) additives.push({ x: x, y: y + 1, t: BeltType.topToVoid });
+              if (e.bn === undefined || !e.bn.isCurve() && !e.fromBottom(true)) beltAdds.push({ x: x, y: y + 1, t: BeltType.topToVoid });
             } break;
 
             case Direction.left: {
@@ -164,9 +165,35 @@ class Display
               else
               {
                 belt(x, y, BeltType.rightToLeft);
-                if (!e.fromRight(true)) additives.push({ x: x + 1, y: y, t: BeltType.voidToLeft });
+                if (!e.fromRight(true)) beltAdds.push({ x: x + 1, y: y, t: BeltType.voidToLeft });
               }
-              if (e.ln === undefined || !e.ln.isCurve() && !e.fromLeft(true)) additives.push({ x: x - 1, y: y, t: BeltType.rightToVoid });
+              if (e.ln === undefined || !e.ln.isCurve() && !e.fromLeft(true)) beltAdds.push({ x: x - 1, y: y, t: BeltType.rightToVoid });
+            } break;
+          }
+        } break;
+
+        case EntityType._splitterLeft: {
+          switch (e.d) // direction
+          {
+            case Direction.top: {
+              belt(x, y, BeltType.bottomToTop);
+              belt(x + 1, y, BeltType.bottomToTop);
+              entityAdds.push({ x: x, y: y, t: 0, draw: splitter });
+            } break;
+            case Direction.right: {
+              belt(x, y, BeltType.leftToRight);
+              belt(x, y + 1, BeltType.leftToRight);
+              entityAdds.push({ x: x, y: y, t: 3, draw: splitter });
+            } break;
+            case Direction.bottom: {
+              belt(x - 1, y, BeltType.topToBottom);
+              belt(x, y, BeltType.topToBottom);
+              entityAdds.push({ x: x - 1, y: y, t: 1, draw: splitter });
+            } break;
+            case Direction.left: {
+              belt(x, y - 1, BeltType.rightToLeft);
+              belt(x, y, BeltType.rightToLeft);
+              entityAdds.push({ x: x, y: y - 1, t: 2, draw: splitter });
             } break;
           }
         } break;
@@ -174,31 +201,15 @@ class Display
     });
 
     // --- pipeline step 3: draw belt additives ---
-    additives.forEach(add =>
+    beltAdds.forEach(add =>
     {
       belt(add.x, add.y, add.t);
     });
 
     // --- pipeline step 4: draw entities ---
-    this.map.callEntities(0, 0, 100, 100, (x, y, e) =>
+    entityAdds.forEach(add =>
     {
-      switch (e.t)
-      {
-        case EntityType.splitterLeft: {
-          switch (e.d) // direction
-          {
-            case Direction.right: {
-            } break;
-          }
-        } break;
-        case EntityType.splitterRight: {
-          switch (e.d) // direction
-          {
-          case Direction.right: {
-          } break;
-          }
-        } break;
-      }
+      add.draw(add.x, add.y, add.t, add.animate);
     });
 
 

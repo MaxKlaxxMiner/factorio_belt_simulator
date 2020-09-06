@@ -20,12 +20,9 @@ class Game
 
     const m = this.map;
 
-    const loopBp = "0eNqd092ugyAMAOB36TVbxCFuvMpysujWLCRaDXTLMYZ3H+rNOZlLJpfl5yvQMkLdPLB3lhjMCPbakQdzHsHbO1XNNMZDj2DAMrYggKp2ithV5PvO8a7GhiEIsHTDXzAy/AhAYssWF2kOhgs92hpdXPDJENB3Pm7raMoaqZ1U+0LAAOa0L2KGm3V4XebzIN7gfAOcf4LVCnzYAB+2nFglPIWUUV6xihQrW7d0woXnc/27sV6Ry4QafScfU+Tsvfyxe+dON38+hoCmitZko2cZ4yc6v5T1KFWpTqUuZaYLHcILdU8UnQ==";
+    const loopBp = "0eNqdluFugyAUhd/l/qYNF1Crr9Isi7ZkIbFolC5rGt99tF2aZZXscv8Jwc/j4R4uV+j6sx0n5wM0V3CHwc/Q7K8wuw/f9re5cBktNOCCPYEA355uozC1fh6HKWw62wdYBDh/tF/Q4PImwPrggrMP0n1weffnU2enuCDFEDAOc3xt8LevRtQGi20h4BKfzLZYFvHCUhxWfIhyj26yh8cCtULWGWSTRTYcsqGQiwyyztJcZpBVkmxWyBWHTHJjx3HDUDTXT/I89i6EOLfCxCfzf60oM8TKLBswI291lg2oSD78IPV6gpEVNJWAGc55kIIVnNLUpD0pObWp/qLLNTQrUDQ0K1E0Q2pO/WtKlSpJqlKZMGIVyYkUTSyroWGiObKihZRSUIZTCjQ0q4vJhAWsxiVJOllBS23VLq+lIEEfK1KkX9esbkXafc2JFk20YpDxNbTxdnu/CTe/Ls4CPu00P063HZrK1FVZoSyLclm+ARXersg=";
 
     m.addBlueprint(1, 1, loopBp);
-    m.addBlueprint(5, 1, loopBp);
-    m.addBlueprint(1, 5, loopBp);
-    m.addBlueprint(5, 5, loopBp);
 
     //for (let y = 2; y < 12; y++)
     //{
@@ -36,9 +33,11 @@ class Game
     //  }
     //}
 
-    //m.add(3, 2, EntityType.transportBelt, Direction.bottom);
+    //m.add(2, 2, EntityType.transportBelt, Direction.right);
     //m.add(2, 3, EntityType.transportBelt, Direction.right);
-    //m.add(3, 3, EntityType.transportBelt, Direction.right);
+    //m.add(3, 2, EntityType.splitter, Direction.right);
+    //m.add(4, 2, EntityType.transportBelt, Direction.right);
+    //m.add(4, 3, EntityType.transportBelt, Direction.right);
   }
 
   lastWheel = 0;

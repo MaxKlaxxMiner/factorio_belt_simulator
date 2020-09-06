@@ -3,8 +3,9 @@
 enum EntityType
 {
   transportBelt = 0,
-  splitterLeft = 1,
-  splitterRight = 2
+  splitter = 1,
+  _splitterLeft = 2,
+  _splitterRight = 3
 }
 
 enum Direction
@@ -131,6 +132,30 @@ class Map
    */
   add(x: number, y: number, e: EntityType, d: Direction)
   {
+    if (e === EntityType.splitter)
+    {
+      switch (d)
+      {
+        case Direction.top: {
+          this.add(x, y, EntityType._splitterLeft, d);
+          this.add(x + 1, y, EntityType._splitterRight, d);
+        } break;
+        case Direction.right: {
+          this.add(x, y, EntityType._splitterLeft, d);
+          this.add(x, y + 1, EntityType._splitterRight, d);
+        } break;
+        case Direction.bottom: {
+          this.add(x, y, EntityType._splitterRight, d);
+          this.add(x + 1, y, EntityType._splitterLeft, d);
+        } break;
+        case Direction.left: {
+          this.add(x, y, EntityType._splitterRight, d);
+          this.add(x, y + 1, EntityType._splitterLeft, d);
+        } break;
+      }
+      return;
+    }
+
     const newEntity = new MapEntity(x, y, e, d);
     this.removeEntity(x, y); // remove old entity (if exsist)
     const lineT = this.entityLines[y - 1];

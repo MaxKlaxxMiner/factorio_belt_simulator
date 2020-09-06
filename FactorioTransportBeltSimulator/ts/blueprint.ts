@@ -48,12 +48,13 @@ class Blueprint
       });
       entities.forEach(e =>
       {
-        const x = (e.position.x - minX) >> 0;
-        const y = (e.position.y - minY) >> 0;
+        const x = (e.position.x - minX + .01) >> 0;
+        const y = (e.position.y - minY + .01) >> 0;
         const d = e.direction === 2 ? Direction.right : e.direction === 6 ? Direction.left : e.direction === 4 ? Direction.bottom : Direction.top;
         switch (e.name)
         {
           case "transport-belt": result.push(new MapEntity(x, y, EntityType.transportBelt, d)); break;
+          case "splitter": result.push(new MapEntity(x, y, EntityType.splitter, d)); break;
         }
       });
     }
@@ -89,9 +90,23 @@ class Blueprint
           next = {
             entity_number: ++count,
             name: "transport-belt",
-            position: { x: e.x, y: e.y },
+            position: { x: e.x + 0.5, y: e.y + 0.5 }
           };
           if (dir === 2 || dir === 4 || dir === 6) next.direction = dir;
+        } break;
+        case EntityType._splitterLeft: {
+          next = {
+            entity_number: ++count,
+            name: "splitter",
+            position: { x: e.x, y: e.y }
+          };
+          switch (e.d)
+          {
+            case Direction.top: next.position.x += 0.5; break;
+            case Direction.right: next.position.y += 0.5; next.direction = 2; break;
+            case Direction.bottom: next.position.x -= 0.5; next.direction = 4; break;
+            case Direction.left: next.position.y -= 0.5; next.direction = 6; break;
+          }
         } break;
       }
 
