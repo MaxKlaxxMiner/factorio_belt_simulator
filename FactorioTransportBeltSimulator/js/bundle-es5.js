@@ -1,3 +1,99 @@
+var Blueprint = (function () {
+    function Blueprint() {
+    }
+    Blueprint.decodeBlueprint = function (base64) {
+        var result = [];
+        try {
+            if (base64[0] !== "0")
+                return result;
+            var blueprint = JSON.parse(pako.inflate(atob(base64.substr(1)), { to: "string" }).toString());
+            console.log(blueprint);
+            var entities = blueprint.blueprint.entities;
+            var minX_1 = 1000000;
+            var minY_1 = 1000000;
+            entities.forEach(function (e) {
+                if (e.position.x < minX_1)
+                    minX_1 = e.position.x;
+                if (e.position.y < minY_1)
+                    minY_1 = e.position.y;
+            });
+            entities.forEach(function (e) {
+                var x = (e.position.x - minX_1 + .01) >> 0;
+                var y = (e.position.y - minY_1 + .01) >> 0;
+                var d = e.direction === 2 ? Direction.right : e.direction === 6 ? Direction.left : e.direction === 4 ? Direction.bottom : Direction.top;
+                switch (e.name) {
+                    case "transport-belt":
+                        result.push(new MapEntity(x, y, EntityType.transportBelt, d));
+                        break;
+                    case "splitter":
+                        result.push(new MapEntity(x, y, EntityType.splitter, d));
+                        break;
+                }
+            });
+        }
+        catch (exc) { }
+        return result;
+    };
+    Blueprint.encodeBlueprint = function (label, entities) {
+        var result = {
+            blueprint: {
+                icons: [],
+                entities: [],
+                label: label,
+                item: "blueprint",
+                version: 281474976710656
+            }
+        };
+        var count = 0;
+        entities.forEach(function (e) {
+            var next;
+            var dir = e.d === Direction.right ? 2 : e.d === Direction.bottom ? 4 : e.d === Direction.left ? 6 : 0;
+            switch (e.t) {
+                case EntityType.transportBelt:
+                    {
+                        next = {
+                            entity_number: ++count,
+                            name: "transport-belt",
+                            position: { x: e.x + 0.5, y: e.y + 0.5 }
+                        };
+                        if (dir === 2 || dir === 4 || dir === 6)
+                            next.direction = dir;
+                    }
+                    break;
+                case EntityType._splitterLeft:
+                    {
+                        next = {
+                            entity_number: ++count,
+                            name: "splitter",
+                            position: { x: e.x, y: e.y }
+                        };
+                        switch (e.d) {
+                            case Direction.top:
+                                next.position.x += 0.5;
+                                break;
+                            case Direction.right:
+                                next.position.y += 0.5;
+                                next.direction = 2;
+                                break;
+                            case Direction.bottom:
+                                next.position.x -= 0.5;
+                                next.direction = 4;
+                                break;
+                            case Direction.left:
+                                next.position.y -= 0.5;
+                                next.direction = 6;
+                                break;
+                        }
+                    }
+                    break;
+            }
+            if (next)
+                result.blueprint.entities.push(next);
+        });
+        return "0" + btoa(pako.deflate(JSON.stringify(result), { to: "string" }).toString());
+    };
+    return Blueprint;
+}());
 var Display = (function () {
     function Display(gameDiv, canvasWidth, canvasHeight, map) {
         this.title = document.title;
@@ -6,7 +102,9 @@ var Display = (function () {
         this.nextFrameLog = 0;
         this.lastFrameLog = 0;
         this.animate = 0;
-        this.zoomLevels = [2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 19, 22, 26, 30, 36, 42, 49, 57, 67, 79, 93, 109, 128, 151, 178, 209];
+        this.offsetX = 0;
+        this.offsetY = 0;
+        this.zoomLevels = [2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 19, 22, 26, 30, 36, 42, 49, 57, 67, 79, 93, 109, 128];
         this.gameDiv = gameDiv;
         gameDiv.style.width = canvasWidth + "px";
         gameDiv.style.height = canvasHeight + "px";
@@ -21,21 +119,33 @@ var Display = (function () {
         this.entityTransportBelt = new DisplayEntityTransportBelt();
         this.entitySplitter = new DisplayEntitySplitter();
         this.map = map;
+        for (var z = this.zoomLevels[this.zoomLevels.length - 1]; z < 20000; z *= Math.pow((Math.sqrt(5) + 1) / 2, 1 / 3))
+            this.zoomLevels.push((z + 0.5) >> 0);
     }
     Display.prototype.setScale = function (scaleLevel) {
-        scaleLevel = Math.floor(scaleLevel);
+        scaleLevel = scaleLevel >> 0;
         if (scaleLevel >= this.zoomLevels.length)
             scaleLevel = this.zoomLevels.length - 1;
         if (scaleLevel < 0)
             scaleLevel = 0;
         if (scaleLevel !== this.scaleLevel) {
             this.scaleLevel = scaleLevel;
-            this.scale = this.zoomLevels[scaleLevel];
+            var newScale = this.zoomLevels[scaleLevel];
+            if (this.scale) {
+                this.offsetX = (this.offsetX - mouseX) / this.scale * newScale + mouseX;
+                this.offsetY = (this.offsetY - mouseY) / this.scale * newScale + mouseY;
+            }
+            this.scale = newScale;
         }
     };
     Display.prototype.calc = function () {
         this.animate++;
         this.countCalc++;
+    };
+    Display.prototype.getMouseFieldPos = function () {
+        var x = ((mouseX - this.offsetX + this.scale * 1000000) / this.scale >> 0) - 1000000;
+        var y = ((mouseY - this.offsetY + this.scale * 1000000) / this.scale >> 0) - 1000000;
+        return { x: x, y: y };
     };
     Display.prototype.draw = function (time) {
         var _this = this;
@@ -50,11 +160,17 @@ var Display = (function () {
         c.imageSmoothingQuality = "high";
         if (this.scaleLevel >= 8) {
             c.clearRect(0, 0, w, h);
-            var gridWidth = Math.floor(this.sprites.tutorialGrid.width * this.scale / 64);
-            var gridHeight = Math.floor(this.sprites.tutorialGrid.height * this.scale / 64);
-            for (var y = 0; y < h; y += gridHeight) {
-                for (var x = -(y % gridWidth) * 6; x < w; x += gridWidth) {
-                    c.drawImage(this.sprites.tutorialGrid, x, y, gridWidth, gridHeight);
+            var picWidth = this.sprites.tutorialGrid.width;
+            var picHeight = this.sprites.tutorialGrid.height;
+            var gridWidth = picWidth * this.scale / 64 >> 0;
+            var gridHeight = picHeight * this.scale / 64 >> 0;
+            var startY = -((this.offsetY / gridHeight >> 0) + 1) * gridHeight;
+            var endY = h - this.offsetY;
+            var endX = w - this.offsetX;
+            for (var y = startY; y <= endY; y += gridHeight) {
+                var startX = ((y + gridHeight * 1000000) * -6) % gridWidth - ((this.offsetX / gridWidth >> 0) + 1) * gridWidth;
+                for (var x = startX; x <= endX; x += gridWidth) {
+                    c.drawImage(this.sprites.tutorialGrid, x + this.offsetX, y + this.offsetY, gridWidth, gridHeight);
                 }
             }
         }
@@ -234,13 +350,12 @@ var Display = (function () {
             c.stroke();
             c.closePath();
         };
-        var mx = mouseX / this.scale >> 0;
-        var my = mouseY / this.scale >> 0;
-        if (mouseX + mouseY > 0) {
+        if (mouseX + mouseY > 0 && this.scale < 500) {
+            var m = this.getMouseFieldPos();
             c.globalAlpha = 0.7;
-            belt(mx - 1, my, 14);
-            belt(mx, my, 0);
-            belt(mx + 1, my, 19);
+            belt(m.x - 1, m.y, 14);
+            belt(m.x, m.y, 0);
+            belt(m.x + 1, m.y, 19);
             c.globalAlpha = 1;
         }
         if (this.animate < 120) {
@@ -306,8 +421,8 @@ var DisplayEntity = (function () {
     }
     DisplayEntity.prototype.prepareForDisplay = function (display) {
         this.ctx = display.canvasContext;
-        this.ofsX = 0;
-        this.ofsY = 0;
+        this.ofsX = display.offsetX;
+        this.ofsY = display.offsetY;
         this.scale = display.scale;
         this.scaleX = display.scale;
         this.scaleY = display.scale;
@@ -395,7 +510,7 @@ var DisplayEntitySplitterWestTop = (function (_super) {
         this.spriteW = this.sprite.width / 8 >> 0;
         this.spriteH = this.sprite.height / 4 >> 0;
         this.ofsX -= this.scale * 0.015;
-        this.ofsY -= this.scale * 0.31;
+        this.ofsY -= this.scale * 0.3134;
         this.scaleX *= 1.40;
         this.scaleY *= 1.50;
         this.animate = this.animate * 0.70 & 31;
@@ -445,7 +560,7 @@ var DisplayEntitySplitterEastTop = (function (_super) {
         this.spriteW = this.sprite.width / 8 >> 0;
         this.spriteH = this.sprite.height / 4 >> 0;
         this.ofsX -= this.scale * 0.075;
-        this.ofsY -= this.scale * 0.435;
+        this.ofsY -= this.scale * 0.434;
         this.scaleX *= 1.40;
         this.scaleY *= 1.62;
         this.animate = this.animate * 0.70 & 31;
@@ -555,6 +670,24 @@ var Game = (function () {
         }
     };
     Game.prototype.calc = function () {
+        var moveDirX = 0;
+        var moveDirY = 0;
+        if (keys[87])
+            moveDirY++;
+        if (keys[65])
+            moveDirX++;
+        if (keys[83])
+            moveDirY--;
+        if (keys[68])
+            moveDirX--;
+        if (moveDirX !== 0 || moveDirY !== 0) {
+            if (moveDirX !== 0 && moveDirY !== 0) {
+                moveDirX /= Math.sqrt(2);
+                moveDirY /= Math.sqrt(2);
+            }
+            this.display.offsetX += moveDirX * Math.min(50, Math.max(5, this.display.scale * 0.2));
+            this.display.offsetY += moveDirY * Math.min(50, Math.max(5, this.display.scale * 0.2));
+        }
         this.display.calc();
         this.calcTime += 16.6666666;
     };
@@ -942,100 +1075,4 @@ var Easing = {
     easeOutQuint: function (t) { return 1 + (--t) * t * t * t * t; },
     easeInOutQuint: function (t) { return t < .5 ? 16 * t * t * t * t * t : 1 + 16 * (--t) * t * t * t * t; }
 };
-var Blueprint = (function () {
-    function Blueprint() {
-    }
-    Blueprint.decodeBlueprint = function (base64) {
-        var result = [];
-        try {
-            if (base64[0] !== "0")
-                return result;
-            var blueprint = JSON.parse(pako.inflate(atob(base64.substr(1)), { to: "string" }).toString());
-            console.log(blueprint);
-            var entities = blueprint.blueprint.entities;
-            var minX_1 = 1000000;
-            var minY_1 = 1000000;
-            entities.forEach(function (e) {
-                if (e.position.x < minX_1)
-                    minX_1 = e.position.x;
-                if (e.position.y < minY_1)
-                    minY_1 = e.position.y;
-            });
-            entities.forEach(function (e) {
-                var x = (e.position.x - minX_1 + .01) >> 0;
-                var y = (e.position.y - minY_1 + .01) >> 0;
-                var d = e.direction === 2 ? Direction.right : e.direction === 6 ? Direction.left : e.direction === 4 ? Direction.bottom : Direction.top;
-                switch (e.name) {
-                    case "transport-belt":
-                        result.push(new MapEntity(x, y, EntityType.transportBelt, d));
-                        break;
-                    case "splitter":
-                        result.push(new MapEntity(x, y, EntityType.splitter, d));
-                        break;
-                }
-            });
-        }
-        catch (exc) { }
-        return result;
-    };
-    Blueprint.encodeBlueprint = function (label, entities) {
-        var result = {
-            blueprint: {
-                icons: [],
-                entities: [],
-                label: label,
-                item: "blueprint",
-                version: 281474976710656
-            }
-        };
-        var count = 0;
-        entities.forEach(function (e) {
-            var next;
-            var dir = e.d === Direction.right ? 2 : e.d === Direction.bottom ? 4 : e.d === Direction.left ? 6 : 0;
-            switch (e.t) {
-                case EntityType.transportBelt:
-                    {
-                        next = {
-                            entity_number: ++count,
-                            name: "transport-belt",
-                            position: { x: e.x + 0.5, y: e.y + 0.5 }
-                        };
-                        if (dir === 2 || dir === 4 || dir === 6)
-                            next.direction = dir;
-                    }
-                    break;
-                case EntityType._splitterLeft:
-                    {
-                        next = {
-                            entity_number: ++count,
-                            name: "splitter",
-                            position: { x: e.x, y: e.y }
-                        };
-                        switch (e.d) {
-                            case Direction.top:
-                                next.position.x += 0.5;
-                                break;
-                            case Direction.right:
-                                next.position.y += 0.5;
-                                next.direction = 2;
-                                break;
-                            case Direction.bottom:
-                                next.position.x -= 0.5;
-                                next.direction = 4;
-                                break;
-                            case Direction.left:
-                                next.position.y -= 0.5;
-                                next.direction = 6;
-                                break;
-                        }
-                    }
-                    break;
-            }
-            if (next)
-                result.blueprint.entities.push(next);
-        });
-        return "0" + btoa(pako.deflate(JSON.stringify(result), { to: "string" }).toString());
-    };
-    return Blueprint;
-}());
 //# sourceMappingURL=bundle-es5.js.map

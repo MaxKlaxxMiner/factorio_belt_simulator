@@ -32,6 +32,9 @@ class Display
     this.entityTransportBelt = new DisplayEntityTransportBelt();
     this.entitySplitter = new DisplayEntitySplitter();
     this.map = map;
+
+    // add ultra-zoom
+    for (let z = this.zoomLevels[this.zoomLevels.length - 1]; z < 20000; z *= Math.pow((Math.sqrt(5) + 1) / 2, 1 / 3)) this.zoomLevels.push((z + 0.5) >> 0);
   }
 
   countFrame = 0;
@@ -39,20 +42,29 @@ class Display
   nextFrameLog = 0;
   lastFrameLog = 0;
   animate = 0;
+
   scaleLevel: number;
   scale: number;
+  offsetX = 0;
+  offsetY = 0;
 
-  zoomLevels = [2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 19, 22, 26, 30, 36, 42, 49, 57, 67, 79, 93, 109, 128, 151, 178, 209];
+  zoomLevels = [2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 19, 22, 26, 30, 36, 42, 49, 57, 67, 79, 93, 109, 128];
 
   setScale(scaleLevel: number): void
   {
-    scaleLevel = Math.floor(scaleLevel);
+    scaleLevel = scaleLevel >> 0;
     if (scaleLevel >= this.zoomLevels.length) scaleLevel = this.zoomLevels.length - 1;
     if (scaleLevel < 0) scaleLevel = 0;
     if (scaleLevel !== this.scaleLevel)
     {
       this.scaleLevel = scaleLevel;
-      this.scale = this.zoomLevels[scaleLevel];
+      const newScale = this.zoomLevels[scaleLevel];
+      if (this.scale)
+      {
+        this.offsetX = (this.offsetX - mouseX) / this.scale * newScale + mouseX;
+        this.offsetY = (this.offsetY - mouseY) / this.scale * newScale + mouseY;
+      }
+      this.scale = newScale;
     }
   }
 
@@ -60,6 +72,13 @@ class Display
   {
     this.animate++;
     this.countCalc++;
+  }
+
+  getMouseFieldPos(): { x: number, y: number }
+  {
+    const x = ((mouseX - this.offsetX + this.scale * 1000000) / this.scale >> 0) - 1000000;
+    const y = ((mouseY - this.offsetY + this.scale * 1000000) / this.scale >> 0) - 1000000;
+    return { x, y };
   }
 
   draw(time: number): boolean
@@ -81,13 +100,19 @@ class Display
     {
       c.clearRect(0, 0, w, h);
 
-      const gridWidth = Math.floor(this.sprites.tutorialGrid.width * this.scale / 64);
-      const gridHeight = Math.floor(this.sprites.tutorialGrid.height * this.scale / 64);
-      for (let y = 0; y < h; y += gridHeight)
+      const picWidth = this.sprites.tutorialGrid.width;
+      const picHeight = this.sprites.tutorialGrid.height;
+      const gridWidth = picWidth * this.scale / 64 >> 0;
+      const gridHeight = picHeight * this.scale / 64 >> 0;
+      const startY = -((this.offsetY / gridHeight >> 0) + 1) * gridHeight;
+      const endY = h - this.offsetY;
+      const endX = w - this.offsetX;
+      for (let y = startY; y <= endY; y += gridHeight)
       {
-        for (let x = -(y % gridWidth) * 6; x < w; x += gridWidth)
+        const startX = ((y + gridHeight * 1000000) * -6) % gridWidth - ((this.offsetX / gridWidth >> 0) + 1) * gridWidth;
+        for (let x = startX; x <= endX; x += gridWidth)
         {
-          c.drawImage(this.sprites.tutorialGrid, x, y, gridWidth, gridHeight);
+          c.drawImage(this.sprites.tutorialGrid, x + this.offsetX, y + this.offsetY, gridWidth, gridHeight);
         }
       }
     }
@@ -250,12 +275,11 @@ class Display
       c.closePath();
     };
 
-    const mx = mouseX / this.scale >> 0;
-    const my = mouseY / this.scale >> 0;
-    if (mouseX + mouseY > 0)
+    if (mouseX + mouseY > 0 && this.scale < 500)
     {
+      const m = this.getMouseFieldPos();
       c.globalAlpha = 0.7;
-      belt(mx - 1, my, 14); belt(mx, my, 0); belt(mx + 1, my, 19);
+      belt(m.x - 1, m.y, 14); belt(m.x, m.y, 0); belt(m.x + 1, m.y, 19);
       c.globalAlpha = 1;
     }
     //helpLines(mx, my, 1, 1);

@@ -46,8 +46,8 @@ class DisplayEntity
   prepareForDisplay(display: Display): void
   {
     this.ctx = display.canvasContext;
-    this.ofsX = 0;
-    this.ofsY = 0;
+    this.ofsX = display.offsetX;
+    this.ofsY = display.offsetY;
     this.scale = display.scale;
     this.scaleX = display.scale;
     this.scaleY = display.scale;
@@ -133,7 +133,7 @@ class DisplayEntitySplitterWestTop extends DisplayEntity
     this.spriteW = this.sprite.width / 8 >> 0;
     this.spriteH = this.sprite.height / 4 >> 0;
     this.ofsX -= this.scale * 0.015;
-    this.ofsY -= this.scale * 0.31;
+    this.ofsY -= this.scale * 0.3134;
     this.scaleX *= 1.40;
     this.scaleY *= 1.50;
     this.animate = this.animate * 0.70 & 31;
@@ -187,7 +187,7 @@ class DisplayEntitySplitterEastTop extends DisplayEntity
     this.spriteW = this.sprite.width / 8 >> 0;
     this.spriteH = this.sprite.height / 4 >> 0;
     this.ofsX -= this.scale * 0.075;
-    this.ofsY -= this.scale * 0.435;
+    this.ofsY -= this.scale * 0.434;
     this.scaleX *= 1.40;
     this.scaleY *= 1.62;
     this.animate = this.animate * 0.70 & 31;

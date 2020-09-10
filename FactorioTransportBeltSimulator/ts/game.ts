@@ -67,6 +67,23 @@ class Game
 
   calc(): void
   {
+    let moveDirX = 0;
+    let moveDirY = 0;
+
+    if (keys[87]) moveDirY++; // W
+    if (keys[65]) moveDirX++; // A
+    if (keys[83]) moveDirY--; // S
+    if (keys[68]) moveDirX--; // D
+    if (moveDirX !== 0 || moveDirY !== 0)
+    {
+      if (moveDirX !== 0 && moveDirY !== 0) // diagonal move? -> reduce speed
+      {
+        moveDirX /= Math.sqrt(2);
+        moveDirY /= Math.sqrt(2);
+      }
+      this.display.offsetX += moveDirX * Math.min(50, Math.max(5, this.display.scale * 0.2));
+      this.display.offsetY += moveDirY * Math.min(50, Math.max(5, this.display.scale * 0.2));
+    }
     this.display.calc();
     this.calcTime += 16.6666666;
   }
