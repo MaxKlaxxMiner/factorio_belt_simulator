@@ -163,27 +163,27 @@ class Map
    * @param e Entity-Type
    * @param d Direction
    */
-  add(x: number, y: number, e: EntityType, d: Direction)
+  addEntity(x: number, y: number, e: EntityType, d: Direction)
   {
     if (e === EntityType.splitter)
     {
       switch (d)
       {
         case Direction.top: {
-          this.add(x, y, EntityType._splitterLeft, d);
-          this.add(x + 1, y, EntityType._splitterRight, d);
+          this.addEntity(x, y, EntityType._splitterLeft, d);
+          this.addEntity(x + 1, y, EntityType._splitterRight, d);
         } break;
         case Direction.right: {
-          this.add(x, y, EntityType._splitterLeft, d);
-          this.add(x, y + 1, EntityType._splitterRight, d);
+          this.addEntity(x, y, EntityType._splitterLeft, d);
+          this.addEntity(x, y + 1, EntityType._splitterRight, d);
         } break;
         case Direction.bottom: {
-          this.add(x, y, EntityType._splitterRight, d);
-          this.add(x + 1, y, EntityType._splitterLeft, d);
+          this.addEntity(x, y, EntityType._splitterRight, d);
+          this.addEntity(x + 1, y, EntityType._splitterLeft, d);
         } break;
         case Direction.left: {
-          this.add(x, y, EntityType._splitterRight, d);
-          this.add(x, y + 1, EntityType._splitterLeft, d);
+          this.addEntity(x, y, EntityType._splitterRight, d);
+          this.addEntity(x, y + 1, EntityType._splitterLeft, d);
         } break;
       }
       return;
@@ -218,7 +218,7 @@ class Map
     const r = Blueprint.decodeBlueprint(base64);
     if (r.length === 0) return false;
 
-    r.forEach(e => { this.add(e.x + startX, e.y + startY, e.t, e.d); });
+    r.forEach(e => { this.addEntity(e.x + startX, e.y + startY, e.t, e.d); });
 
     return true;
   }

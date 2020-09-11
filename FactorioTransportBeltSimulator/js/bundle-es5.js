@@ -105,6 +105,8 @@ var Display = (function () {
         this.offsetX = 0;
         this.offsetY = 0;
         this.zoomLevels = [2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 19, 22, 26, 30, 36, 42, 49, 57, 67, 79, 93, 109, 128];
+        this.previewEntity = EntityType.transportBelt;
+        this.previewDirection = Direction.right;
         this.gameDiv = gameDiv;
         gameDiv.style.width = canvasWidth + "px";
         gameDiv.style.height = canvasHeight + "px";
@@ -147,44 +149,15 @@ var Display = (function () {
         var y = ((mouseY - this.offsetY + this.scale * 1000000) / this.scale >> 0) - 1000000;
         return { x: x, y: y };
     };
-    Display.prototype.draw = function (time) {
-        var _this = this;
-        if (!this.sprites || !this.sprites.hasLoaded())
-            return false;
-        this.entityTransportBelt.prepareForDisplay(this);
-        this.entitySplitter.prepareForDisplay(this);
-        var c = this.canvasContext;
-        var w = this.canvasElement.width;
-        var h = this.canvasElement.height;
-        c.imageSmoothingEnabled = false;
-        c.imageSmoothingQuality = "high";
-        if (this.scaleLevel >= 8) {
-            c.clearRect(0, 0, w, h);
-            var picWidth = this.sprites.tutorialGrid.width;
-            var picHeight = this.sprites.tutorialGrid.height;
-            var gridWidth = picWidth * this.scale / 64 >> 0;
-            var gridHeight = picHeight * this.scale / 64 >> 0;
-            var startY = -((this.offsetY / gridHeight >> 0) + 1) * gridHeight;
-            var endY = h - this.offsetY;
-            var endX = w - this.offsetX;
-            for (var y = startY; y <= endY; y += gridHeight) {
-                var startX = ((y + gridHeight * 1000000) * -6) % gridWidth - ((this.offsetX / gridWidth >> 0) + 1) * gridWidth;
-                for (var x = startX; x <= endX; x += gridWidth) {
-                    c.drawImage(this.sprites.tutorialGrid, x + this.offsetX, y + this.offsetY, gridWidth, gridHeight);
-                }
-            }
-        }
-        else {
-            c.fillStyle = "#848484";
-            c.fillRect(0, 0, w, w);
-        }
-        if (this.scaleLevel < 2)
-            c.imageSmoothingEnabled = true;
+    Display.prototype.drawEntities = function (entities) {
         var belt = this.entityTransportBelt.draw;
         var splitter = this.entitySplitter.draw;
         var beltAdds = [];
         var entityAdds = [];
-        this.map.callEntities(0, 0, 100, 100, function (x, y, e) {
+        entities.forEach(function (entity) {
+            var x = entity.x;
+            var y = entity.y;
+            var e = entity.e;
             switch (e.t) {
                 case EntityType.transportBelt:
                     {
@@ -334,6 +307,57 @@ var Display = (function () {
         entityAdds.forEach(function (add) {
             add.draw(add.x, add.y, add.t, add.animate);
         });
+    };
+    Display.prototype.drawPreviewEntity = function (ctx) {
+        var m = this.getMouseFieldPos();
+        ctx.globalAlpha = 0.7;
+        var e = new MapEntity(m.x, m.y, this.previewEntity, this.previewDirection);
+        e.tn = this.map.getEntity(e.x, e.y - 1);
+        e.rn = this.map.getEntity(e.x + 1, e.y);
+        e.bn = this.map.getEntity(e.x, e.y + 1);
+        e.ln = this.map.getEntity(e.x - 1, e.y);
+        this.drawEntities([{ x: m.x, y: m.y, e: e }]);
+        ctx.globalAlpha = 1;
+    };
+    Display.prototype.draw = function (time) {
+        var _this = this;
+        if (!this.sprites || !this.sprites.hasLoaded())
+            return false;
+        this.entityTransportBelt.prepareForDisplay(this);
+        this.entitySplitter.prepareForDisplay(this);
+        var c = this.canvasContext;
+        var w = this.canvasElement.width;
+        var h = this.canvasElement.height;
+        c.imageSmoothingEnabled = false;
+        c.imageSmoothingQuality = "high";
+        if (this.scaleLevel >= 8) {
+            c.clearRect(0, 0, w, h);
+            var picWidth = this.sprites.tutorialGrid.width;
+            var picHeight = this.sprites.tutorialGrid.height;
+            var gridWidth = picWidth * this.scale / 64 >> 0;
+            var gridHeight = picHeight * this.scale / 64 >> 0;
+            var startY = -((this.offsetY / gridHeight >> 0) + 1) * gridHeight;
+            var endY = h - this.offsetY;
+            var endX = w - this.offsetX;
+            for (var y = startY; y <= endY; y += gridHeight) {
+                var startX = ((y + gridHeight * 1000000) * -6) % gridWidth - ((this.offsetX / gridWidth >> 0) + 1) * gridWidth;
+                for (var x = startX; x <= endX; x += gridWidth) {
+                    c.drawImage(this.sprites.tutorialGrid, x + this.offsetX, y + this.offsetY, gridWidth, gridHeight);
+                }
+            }
+        }
+        else {
+            c.fillStyle = "#848484";
+            c.fillRect(0, 0, w, w);
+        }
+        if (this.scaleLevel < 2)
+            c.imageSmoothingEnabled = true;
+        var entityList = [];
+        this.map.callEntities(-100, -100, 100, 100, function (x, y, e) { return entityList.push({ x: x, y: y, e: e }); });
+        this.drawEntities(entityList);
+        if (mouseX + mouseY > 0 && this.scale < 500) {
+            this.drawPreviewEntity(c);
+        }
         var helpLines = function (x, y, width, height) {
             c.beginPath();
             c.strokeStyle = "#0f0";
@@ -350,14 +374,6 @@ var Display = (function () {
             c.stroke();
             c.closePath();
         };
-        if (mouseX + mouseY > 0 && this.scale < 500) {
-            var m = this.getMouseFieldPos();
-            c.globalAlpha = 0.7;
-            belt(m.x - 1, m.y, 14);
-            belt(m.x, m.y, 0);
-            belt(m.x + 1, m.y, 19);
-            c.globalAlpha = 1;
-        }
         if (this.animate < 120) {
             c.globalAlpha = Easing.easeInQuad((120 - this.animate) / 120);
             c.fillStyle = "#000";
@@ -643,6 +659,7 @@ var game;
 var Game = (function () {
     function Game(gameDiv, canvasWidth, canvasHeight) {
         this.lastWheel = 0;
+        this.entityDirection = Direction.right;
         this.calcTime = 0;
         this.map = new Map();
         this.display = new Display(gameDiv, canvasWidth, canvasHeight, this.map);
@@ -658,6 +675,20 @@ var Game = (function () {
         if (keys[109]) {
             keys[109] = false;
             this.display.setScale(this.display.scaleLevel - 1);
+        }
+        if (keys[82]) {
+            keys[82] = false;
+            this.display.previewDirection++;
+            if (this.display.previewDirection === 4)
+                this.display.previewDirection = 0;
+        }
+        if (mouseButtons === 1) {
+            var m = this.display.getMouseFieldPos();
+            this.map.addEntity(m.x, m.y, this.display.previewEntity, this.display.previewDirection);
+        }
+        if (mouseButtons === 2) {
+            var m = this.display.getMouseFieldPos();
+            this.map.removeEntity(m.x, m.y);
         }
         if (this.lastWheel !== mouseWheel) {
             if (mouseWheel < this.lastWheel) {
@@ -901,31 +932,31 @@ var Map = (function () {
         }
         return true;
     };
-    Map.prototype.add = function (x, y, e, d) {
+    Map.prototype.addEntity = function (x, y, e, d) {
         if (e === EntityType.splitter) {
             switch (d) {
                 case Direction.top:
                     {
-                        this.add(x, y, EntityType._splitterLeft, d);
-                        this.add(x + 1, y, EntityType._splitterRight, d);
+                        this.addEntity(x, y, EntityType._splitterLeft, d);
+                        this.addEntity(x + 1, y, EntityType._splitterRight, d);
                     }
                     break;
                 case Direction.right:
                     {
-                        this.add(x, y, EntityType._splitterLeft, d);
-                        this.add(x, y + 1, EntityType._splitterRight, d);
+                        this.addEntity(x, y, EntityType._splitterLeft, d);
+                        this.addEntity(x, y + 1, EntityType._splitterRight, d);
                     }
                     break;
                 case Direction.bottom:
                     {
-                        this.add(x, y, EntityType._splitterRight, d);
-                        this.add(x + 1, y, EntityType._splitterLeft, d);
+                        this.addEntity(x, y, EntityType._splitterRight, d);
+                        this.addEntity(x + 1, y, EntityType._splitterLeft, d);
                     }
                     break;
                 case Direction.left:
                     {
-                        this.add(x, y, EntityType._splitterRight, d);
-                        this.add(x, y + 1, EntityType._splitterLeft, d);
+                        this.addEntity(x, y, EntityType._splitterRight, d);
+                        this.addEntity(x, y + 1, EntityType._splitterLeft, d);
                     }
                     break;
             }
@@ -965,7 +996,7 @@ var Map = (function () {
         var r = Blueprint.decodeBlueprint(base64);
         if (r.length === 0)
             return false;
-        r.forEach(function (e) { _this.add(e.x + startX, e.y + startY, e.t, e.d); });
+        r.forEach(function (e) { _this.addEntity(e.x + startX, e.y + startY, e.t, e.d); });
         return true;
     };
     Map.prototype.getBlueprint = function (label) {

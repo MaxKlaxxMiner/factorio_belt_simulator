@@ -37,6 +37,7 @@ class Game
   }
 
   lastWheel = 0;
+  entityDirection: Direction = Direction.right;
   uiUpdate(): void
   {
     if (keys[107]) // numpad +
@@ -48,6 +49,22 @@ class Game
     {
       keys[109] = false;
       this.display.setScale(this.display.scaleLevel - 1);
+    }
+    if (keys[82]) // R
+    {
+      keys[82] = false;
+      this.display.previewDirection++;
+      if (this.display.previewDirection === 4) this.display.previewDirection = 0;
+    }
+    if (mouseButtons === 1)
+    {
+      const m = this.display.getMouseFieldPos();
+      this.map.addEntity(m.x, m.y, this.display.previewEntity, this.display.previewDirection);
+    }
+    if (mouseButtons === 2)
+    {
+      const m = this.display.getMouseFieldPos();
+      this.map.removeEntity(m.x, m.y);
     }
     if (this.lastWheel !== mouseWheel)
     {

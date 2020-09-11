@@ -81,59 +81,20 @@ class Display
     return { x, y };
   }
 
-  draw(time: number): boolean
+  drawEntities(entities: Array<{ x: number, y: number, e: MapEntity }>): void
   {
-    // --- pipeline step 0: prepare ---
-    if (!this.sprites || !this.sprites.hasLoaded()) return false; // missing sprites?
-
-    this.entityTransportBelt.prepareForDisplay(this);
-    this.entitySplitter.prepareForDisplay(this);
-
-    const c = this.canvasContext;
-    const w = this.canvasElement.width;
-    const h = this.canvasElement.height;
-    c.imageSmoothingEnabled = false;
-    c.imageSmoothingQuality = "high";
-
-    // --- pipeline step 1: background (tutorial-grid) ---
-    if (this.scaleLevel >= 8)
-    {
-      c.clearRect(0, 0, w, h);
-
-      const picWidth = this.sprites.tutorialGrid.width;
-      const picHeight = this.sprites.tutorialGrid.height;
-      const gridWidth = picWidth * this.scale / 64 >> 0;
-      const gridHeight = picHeight * this.scale / 64 >> 0;
-      const startY = -((this.offsetY / gridHeight >> 0) + 1) * gridHeight;
-      const endY = h - this.offsetY;
-      const endX = w - this.offsetX;
-      for (let y = startY; y <= endY; y += gridHeight)
-      {
-        const startX = ((y + gridHeight * 1000000) * -6) % gridWidth - ((this.offsetX / gridWidth >> 0) + 1) * gridWidth;
-        for (let x = startX; x <= endX; x += gridWidth)
-        {
-          c.drawImage(this.sprites.tutorialGrid, x + this.offsetX, y + this.offsetY, gridWidth, gridHeight);
-        }
-      }
-    }
-    else // fill gray = faster
-    {
-      c.fillStyle = "#848484";
-      c.fillRect(0, 0, w, w);
-    }
-    if (this.scaleLevel < 2) c.imageSmoothingEnabled = true;
-
-    // --- Entities-Methods ---
     const belt = this.entityTransportBelt.draw;
     const splitter = this.entitySplitter.draw;
 
-    //todo: optimize viewport
-
-    // --- pipeline step 2: draw transport belts ---
+    // --- pipeline step 1: draw transport belts ---
     const beltAdds: { x: number, y: number, t: BeltType }[] = [];
     const entityAdds: { x: number, y: number, t: number, animate?: number, draw: (x: number, y: number, type: number, animate?: number) => void }[] = [];
-    this.map.callEntities(0, 0, 100, 100, (x, y, e) =>
+
+    entities.forEach(entity =>
     {
+      const x = entity.x;
+      const y = entity.y;
+      const e = entity.e;
       switch (e.t)
       {
         case EntityType.transportBelt: {
@@ -241,18 +202,89 @@ class Display
       }
     });
 
-    // --- pipeline step 3: draw belt additives ---
+    // --- pipeline step 2: draw belt additives ---
     beltAdds.forEach(add =>
     {
       belt(add.x, add.y, add.t);
     });
 
-    // --- pipeline step 4: draw entities ---
+    // --- pipeline step 3: draw entities ---
     entityAdds.forEach(add =>
     {
       add.draw(add.x, add.y, add.t, add.animate);
     });
+  }
 
+  previewEntity: EntityType = EntityType.transportBelt;
+  previewDirection: Direction = Direction.right;
+
+  drawPreviewEntity(ctx: CanvasRenderingContext2D): void
+  {
+    const m = this.getMouseFieldPos();
+    ctx.globalAlpha = 0.7;
+
+    const e = new MapEntity(m.x, m.y, this.previewEntity, this.previewDirection);
+    e.tn = this.map.getEntity(e.x, e.y - 1);
+    e.rn = this.map.getEntity(e.x + 1, e.y);
+    e.bn = this.map.getEntity(e.x, e.y + 1);
+    e.ln = this.map.getEntity(e.x - 1, e.y);
+    this.drawEntities([{ x: m.x, y: m.y, e: e }]);
+
+    ctx.globalAlpha = 1;
+  }
+
+  draw(time: number): boolean
+  {
+    // --- pipeline step 0: prepare ---
+    if (!this.sprites || !this.sprites.hasLoaded()) return false; // missing sprites?
+
+    this.entityTransportBelt.prepareForDisplay(this);
+    this.entitySplitter.prepareForDisplay(this);
+
+    const c = this.canvasContext;
+    const w = this.canvasElement.width;
+    const h = this.canvasElement.height;
+    c.imageSmoothingEnabled = false;
+    c.imageSmoothingQuality = "high";
+
+    // --- pipeline step 1: background (tutorial-grid) ---
+    if (this.scaleLevel >= 8)
+    {
+      c.clearRect(0, 0, w, h);
+
+      const picWidth = this.sprites.tutorialGrid.width;
+      const picHeight = this.sprites.tutorialGrid.height;
+      const gridWidth = picWidth * this.scale / 64 >> 0;
+      const gridHeight = picHeight * this.scale / 64 >> 0;
+      const startY = -((this.offsetY / gridHeight >> 0) + 1) * gridHeight;
+      const endY = h - this.offsetY;
+      const endX = w - this.offsetX;
+      for (let y = startY; y <= endY; y += gridHeight)
+      {
+        const startX = ((y + gridHeight * 1000000) * -6) % gridWidth - ((this.offsetX / gridWidth >> 0) + 1) * gridWidth;
+        for (let x = startX; x <= endX; x += gridWidth)
+        {
+          c.drawImage(this.sprites.tutorialGrid, x + this.offsetX, y + this.offsetY, gridWidth, gridHeight);
+        }
+      }
+    }
+    else // fill gray = faster
+    {
+      c.fillStyle = "#848484";
+      c.fillRect(0, 0, w, w);
+    }
+    if (this.scaleLevel < 2) c.imageSmoothingEnabled = true;
+
+    //todo: optimize viewport
+    const entityList: Array<{ x: number, y: number, e: MapEntity }> = [];
+    this.map.callEntities(-100, -100, 100, 100, (x, y, e) => entityList.push({ x, y, e }));
+    this.drawEntities(entityList);
+
+    // --- draw preview ---
+    if (mouseX + mouseY > 0 && this.scale < 500)
+    {
+      this.drawPreviewEntity(c);
+    }
 
     // --- Helper lines ---
     const helpLines = (x: number, y: number, width: number, height: number) =>
@@ -274,14 +306,6 @@ class Display
       c.stroke();
       c.closePath();
     };
-
-    if (mouseX + mouseY > 0 && this.scale < 500)
-    {
-      const m = this.getMouseFieldPos();
-      c.globalAlpha = 0.7;
-      belt(m.x - 1, m.y, 14); belt(m.x, m.y, 0); belt(m.x + 1, m.y, 19);
-      c.globalAlpha = 1;
-    }
     //helpLines(mx, my, 1, 1);
 
     // --- Final ---
